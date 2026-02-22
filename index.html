@@ -454,7 +454,7 @@
   </div>
 
   <div class="config-notice" id="configNotice" style="display:none">
-    ⚙️ <strong>Configure:</strong> substitua <code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE</code> pela sua chave Supabase.
+    ⚙️ <strong>Configure:</strong> substitua <code>COLE_SUA_ANON_KEY_AQUI</code> pela sua chave Supabase.
   </div>
 
   <!-- KPIs -->
@@ -492,21 +492,21 @@
     </div>
   </div>
 
-  <!-- Instance + Canal -->
+  <!-- Canal + WhatsApp -->
   <div class="grid-2">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-dot" style="background:var(--purple)"></div>
-        <div class="card-title">Por instância</div>
-      </div>
-      <div class="inst-list" id="instList"><div class="empty-state">carregando...</div></div>
-    </div>
     <div class="card">
       <div class="card-header">
         <div class="card-dot" style="background:var(--teal)"></div>
         <div class="card-title">Por canal</div>
       </div>
       <div class="chart-wrap" style="height:185px"><canvas id="canalChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-dot" style="background:var(--purple)"></div>
+        <div class="card-title">Por WhatsApp</div>
+      </div>
+      <div class="inst-list" id="instList"><div class="empty-state">carregando...</div></div>
     </div>
   </div>
 
@@ -613,20 +613,33 @@
         backgroundColor:counts.map(v=>v===max?'#e8375a':'rgba(232,55,90,0.15)'),
         borderRadius:6, borderWidth:0
       }]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:ax,y:{...ax,beginAtZero:true}}}
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:false}},scales:{x:ax,y:{...ax,beginAtZero:true}},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+' msgs'}}}}
     });
   }
 
+  const INST_LABELS = {
+    'morenapitaya': '31 97266-9695',
+    'morenapitaya-principal': '31 99307-5621',
+    'morenapitaya-sdr': '31 99552-7813',
+    'BOT': 'Instagram BOT',
+    'Manual': 'Instagram Manual'
+  };
+
   function doInst(data){
     const c={};
-    data.forEach(d=>{c[d.instancia]=(c[d.instancia]||0)+1;});
+    data.forEach(d=>{
+      if(d.canal==='whatsapp') c[d.instancia]=(c[d.instancia]||0)+1;
+    });
     const max=Math.max(...Object.values(c),1);
     document.getElementById('instList').innerHTML=
       Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`
         <div class="inst-item">
-          <div class="inst-label">${n}</div>
-          <div class="inst-bar-bg"><div class="inst-bar" style="width:${Math.round(v/max*100)}%;background:${INST_COLORS[n]||'#a0aab5'}"></div></div>
-          <div class="inst-n">${v}</div>
+          <div class="inst-label">${INST_LABELS[n]||n}</div>
+          <div class="inst-bar-bg">
+            <div class="inst-bar" style="width:${Math.round(v/max*100)}%;background:${INST_COLORS[n]||'#a0aab5'}"></div>
+          </div>
+          <div class="inst-n" style="background:${INST_COLORS[n]||'#a0aab5'};color:#fff;padding:0.1rem 0.5rem;border-radius:5px;font-size:0.75rem">${v}</div>
         </div>`).join('');
   }
 
@@ -652,7 +665,7 @@
     wChart=new Chart(ctx,{
       type:'bar',
       data:{labels:days,datasets:[{data:counts,backgroundColor:counts.map(v=>v===max?'#7ab648':'rgba(122,182,72,0.18)'),borderRadius:6,borderWidth:0}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:ax,y:{...ax,beginAtZero:true}}}
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+' msgs'}}},scales:{x:ax,y:{...ax,beginAtZero:true}}}
     });
   }
 
