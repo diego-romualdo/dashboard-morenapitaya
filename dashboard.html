@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard · Morena Pitaya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --pink:    #e8375a;
+      --pink-l:  #fdedf0;
+      --green:   #7ab648;
+      --green-l: #f0f7e8;
+      --navy:    #1e2a3a;
+      --navy2:   #253348;
+      --bg:      #f0f2f5;
+      --surface: #ffffff;
+      --border:  #e8eaed;
+      --text:    #1a2030;
+      --text2:   #6b7a8d;
+      --muted:   #a0aab5;
+      --amber:   #f5a623;
+      --teal:    #17b8a6;
+      --purple:  #8b5cf6;
+      --shadow:  rgba(30,42,58,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .sidebar-brand {
+      padding: 2rem 1.5rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .brand-fruit {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.15);
+    }
+
+    .brand-fruit img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    .brand-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    .brand-name span { color: var(--green); }
+
+    .brand-sub {
+      font-size: 0.864rem;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 0.6rem;
+    }
+
+    .sidebar-section {
+      padding: 1.2rem 1rem;
+      flex: 1;
+    }
+
+    .sidebar-label {
+      font-size: 0.696rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      padding: 0 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.65rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.96rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 0.2rem;
+    }
+
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); }
+    .nav-item.active { background: rgba(232,55,90,0.2); color: #fff; font-weight: 600; }
+    .nav-item.active .nav-dot { background: var(--pink); }
+
+    .nav-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer {
+      padding: 1.2rem 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--teal);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .live-dot {
+      width: 7px; height: 7px;
+      background: var(--teal);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .last-update {
+      font-size: 0.696rem;
+      color: rgba(255,255,255,0.25);
+      margin-top: 0.4rem;
+    }
+
+    /* MAIN CONTENT */
+    .content {
+      flex: 1;
+      min-width: 0;
+      padding: 2rem;
+      overflow-x: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.8rem;
+    }
+
+    .page-title {
+      font-size: 1.56rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .page-sub {
+      font-size: 0.864rem;
+      color: var(--text2);
+      margin-top: 0.2rem;
+      font-weight: 400;
+    }
+
+    .period-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.3rem;
+    }
+
+    .period-btn {
+      background: none; border: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.864rem; font-weight: 600;
+      padding: 0.4rem 0.9rem;
+      border-radius: 7px;
+      cursor: pointer;
+      color: var(--text2);
+      transition: all 0.18s;
+    }
+
+    .period-btn:hover { color: var(--pink); }
+    .period-btn.active { background: var(--pink); color: #fff; }
+
+    .refresh-btn {
+      margin-left: 0.8rem;
+      background: none;
+      border: 1.5px solid var(--border);
+      color: var(--text2);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.864rem; font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .refresh-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* KPIs */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .kpi {
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 1.4rem 1.3rem;
+      box-shadow: 0 2px 8px var(--shadow);
+      border: 1px solid var(--border);
+      animation: fadeUp 0.4s ease forwards;
+      opacity: 0; transform: translateY(12px);
+    }
+
+    .kpi:nth-child(1){animation-delay:.05s} .kpi:nth-child(2){animation-delay:.1s}
+    .kpi:nth-child(3){animation-delay:.15s} .kpi:nth-child(4){animation-delay:.2s}
+
+    @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+
+    .kpi-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .kpi-label {
+      font-size: 0.816rem;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .kpi-badge {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .kpi:nth-child(1) .kpi-badge { background: var(--pink-l); }
+    .kpi:nth-child(2) .kpi-badge { background: #fff8ec; }
+    .kpi:nth-child(3) .kpi-badge { background: #eafaf8; }
+    .kpi:nth-child(4) .kpi-badge { background: var(--green-l); }
+
+    .kpi-value {
+      font-size: 2.88rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .kpi:nth-child(1) .kpi-value { color: var(--pink); }
+    .kpi:nth-child(2) .kpi-value { color: var(--amber); }
+    .kpi:nth-child(3) .kpi-value { color: var(--teal); }
+    .kpi:nth-child(4) .kpi-value { color: var(--green); }
+
+    .kpi-sub {
+      font-size: 0.756rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+      font-weight: 400;
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 1.4rem;
+      box-shadow: 0 2px 8px var(--shadow);
+      border: 1px solid var(--border);
+      animation: fadeUp 0.4s ease 0.25s forwards;
+      opacity: 0; transform: translateY(12px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .card-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text2);
+    }
+
+    .chart-wrap { position: relative; height: 210px; }
+
+    .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1.2rem; }
+    .grid-main { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.2rem; }
+    .grid-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* Instance */
+    .inst-list { display: flex; flex-direction: column; gap: 0.9rem; }
+    .inst-item { display: flex; align-items: center; gap: 0.8rem; }
+    .inst-label {
+      font-size: 0.78rem; font-weight: 700;
+      min-width: 9rem;
+      color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .inst-bar-bg { flex: 1; height: 7px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .inst-bar { height: 100%; border-radius: 4px; transition: width 0.9s cubic-bezier(.4,0,.2,1); }
+    .inst-n { font-size: 0.864rem; font-weight: 700; color: var(--text2); min-width: 2rem; text-align: right; }
+
+    /* Unanswered */
+    .pend-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 210px; overflow-y: auto; }
+    .pend-list::-webkit-scrollbar{width:3px} .pend-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+    .pend-item {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding: 0.65rem 0.8rem;
+      background: var(--pink-l);
+      border-left: 3px solid var(--pink);
+      border-radius: 0 8px 8px 0;
+      font-size: 0.78rem;
+    }
+
+    .pend-canal {
+      font-size: 0.696rem; font-weight: 700;
+      background: var(--pink); color: #fff;
+      padding: 0.15rem 0.45rem; border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .pend-session { flex: 1; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .pend-time {
+      font-size: 0.864rem; font-weight: 700;
+      background: var(--amber); color: #fff;
+      padding: 0.15rem 0.45rem; border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.4rem; padding: 2rem; color: var(--muted); font-size: 0.864rem; font-weight: 500;
+    }
+
+    .empty-state .icon { font-size: 2rem; }
+
+    .config-notice {
+      background: #fffbec;
+      border: 1.5px solid var(--amber);
+      border-radius: 10px;
+      padding: 1rem 1.3rem;
+      font-size: 0.864rem;
+      line-height: 1.7;
+      color: var(--text2);
+      margin-bottom: 1.2rem;
+    }
+
+    .config-notice strong { color: var(--amber); }
+    .config-notice code { background: var(--border); padding: 0.1rem 0.4rem; border-radius: 4px; }
+
+    @media(max-width:900px){
+      .sidebar{display:none}
+      .content{padding:1.2rem}
+      .kpi-row{grid-template-columns:repeat(2,1fr)}
+      .grid-2,.grid-bottom{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <div class="brand-fruit"><img src="logo.jpg" alt="Morena Pitaya"/></div>
+      <div class="brand-name">Morena <span>Pitaya</span></div>
+    </div>
+    <div class="brand-sub">Central de Métricas</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Canais</div>
+    <div class="nav-item active"><div class="nav-dot"></div> Todos os canais</div>
+    <div class="nav-item"><div class="nav-dot"></div> WhatsApp</div>
+    <div class="nav-item"><div class="nav-dot"></div> Instagram Bot</div>
+    <div class="nav-item"><div class="nav-dot"></div> Instagram Manual</div>
+
+    <div class="sidebar-label" style="margin-top:1.5rem">Instâncias</div>
+    <div class="nav-item"><div class="nav-dot"></div> 31 99307-5621</div>
+    <div class="nav-item"><div class="nav-dot"></div> 31 97266-9695</div>
+    <div class="nav-item"><div class="nav-dot"></div> 31 99552-7813</div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="live-badge"><span class="live-dot"></span> Ao vivo</div>
+    <div class="last-update" id="lastUpdate">—</div>
+  </div>
+</aside>
+
+<!-- CONTENT -->
+<main class="content">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Atendimentos</div>
+      <div class="page-sub">Visão geral de todos os canais</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem">
+      <div class="period-group">
+        <button class="period-btn active" onclick="setPeriod('today',this)">Hoje</button>
+        <button class="period-btn" onclick="setPeriod('week',this)">7 dias</button>
+        <button class="period-btn" onclick="setPeriod('month',this)">30 dias</button>
+      </div>
+      <button class="refresh-btn" onclick="loadAll()">↻</button>
+    </div>
+  </div>
+
+  <div class="config-notice" id="configNotice" style="display:none">
+    ⚙️ <strong>Configure:</strong> substitua <code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE</code> pela sua chave Supabase.
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-label">Total</div><div class="kpi-badge">💬</div></div>
+      <div class="kpi-value" id="kpiTotal">—</div>
+      <div class="kpi-sub">mensagens no período</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-label">Tempo médio</div><div class="kpi-badge">⏱️</div></div>
+      <div class="kpi-value" id="kpiTempo">—</div>
+      <div class="kpi-sub">minutos para responder</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-label">Respondidas</div><div class="kpi-badge">✅</div></div>
+      <div class="kpi-value" id="kpiResp">—</div>
+      <div class="kpi-sub" id="kpiPct">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-label">Pendentes</div><div class="kpi-badge">⚠️</div></div>
+      <div class="kpi-value" id="kpiPend">—</div>
+      <div class="kpi-sub">aguardando resposta</div>
+    </div>
+  </div>
+
+  <!-- Time chart -->
+  <div class="grid-main">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-dot" style="background:var(--pink)"></div>
+        <div class="card-title" id="timeLabel">Mensagens por hora · hoje</div>
+      </div>
+      <div class="chart-wrap"><canvas id="timeChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Instance + Canal -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-dot" style="background:var(--purple)"></div>
+        <div class="card-title">Por instância</div>
+      </div>
+      <div class="inst-list" id="instList"><div class="empty-state">carregando...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-dot" style="background:var(--teal)"></div>
+        <div class="card-title">Por canal</div>
+      </div>
+      <div class="chart-wrap" style="height:185px"><canvas id="canalChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Week + Pending -->
+  <div class="grid-bottom">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-dot" style="background:var(--amber)"></div>
+        <div class="card-title">Por dia da semana</div>
+      </div>
+      <div class="chart-wrap"><canvas id="weekChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-dot" style="background:var(--pink)"></div>
+        <div class="card-title">Aguardando resposta</div>
+      </div>
+      <div class="pend-list" id="pendList"><div class="empty-state">carregando...</div></div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const SUPABASE_URL = 'https://supabase.morenapitaya.com';
+  const SUPABASE_ANON_KEY = 'COLE_SUA_ANON_KEY_AQUI';
+
+  const INST_COLORS = {
+    'morenapitaya':'#e8375a','morenapitaya-principal':'#f07060',
+    'morenapitaya-sdr':'#7ab648','BOT':'#8b5cf6','Manual':'#f5a623'
+  };
+  const CANAL_COLORS = {'whatsapp':'#25d366','instagram':'#e8375a'};
+
+  let period='today', tChart, cChart, wChart;
+
+  const ax = { grid:{color:'#e8eaed'}, ticks:{color:'#a0aab5',font:{family:'Plus Jakarta Sans',size:10}} };
+
+  function hdrs(){ return {'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}; }
+
+  function from(p){
+    const n=new Date();
+    if(p==='today') return new Date(n.getFullYear(),n.getMonth(),n.getDate()).toISOString();
+    return new Date(n-(p==='week'?7:30)*86400000).toISOString();
+  }
+
+  async function q(params){
+    const u=new URL(SUPABASE_URL+'/rest/v1/atendimento');
+    Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));
+    const r=await fetch(u,{headers:hdrs()});
+    if(!r.ok) throw new Error(await r.text());
+    return r.json();
+  }
+
+  function setPeriod(p,btn){
+    period=p;
+    document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const lbl={today:'Mensagens por hora · hoje',week:'Mensagens por dia · 7 dias',month:'Mensagens por dia · 30 dias'};
+    document.getElementById('timeLabel').textContent=lbl[p];
+    loadAll();
+  }
+
+  async function loadAll(){
+    if(SUPABASE_ANON_KEY==='COLE_SUA_ANON_KEY_AQUI'){document.getElementById('configNotice').style.display='block';return;}
+    try{
+      const data=await q({select:'*',horario_msg:'gte.'+from(period),order:'horario_msg.asc',limit:5000});
+      doKPIs(data); doTime(data); doInst(data); doCanal(data); doWeek(data); await doPend();
+      document.getElementById('lastUpdate').textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    }catch(e){console.error(e);}
+  }
+
+  function doKPIs(data){
+    const rec=data.filter(d=>d.tipo==='recebida');
+    const resp=data.filter(d=>d.respondida===true);
+    const pend=rec.filter(d=>!d.respondida);
+    const tempos=data.filter(d=>d.tempo_resposta>0).map(d=>d.tempo_resposta);
+    const avg=tempos.length?Math.round(tempos.reduce((a,b)=>a+b,0)/tempos.length/60):0;
+    document.getElementById('kpiTotal').textContent=data.length;
+    document.getElementById('kpiTempo').textContent=avg+'min';
+    document.getElementById('kpiResp').textContent=resp.length;
+    document.getElementById('kpiPct').textContent=(rec.length?Math.round(resp.length/rec.length*100):0)+'% das recebidas';
+    document.getElementById('kpiPend').textContent=pend.length;
+  }
+
+  function doTime(data){
+    const ctx=document.getElementById('timeChart').getContext('2d');
+    let labels=[],counts=[];
+    if(period==='today'){
+      labels=Array.from({length:24},(_,i)=>String(i).padStart(2,'0')+'h');
+      counts=new Array(24).fill(0);
+      data.forEach(d=>counts[new Date(d.horario_msg).getHours()]++);
+    } else {
+      const days=period==='week'?7:30;
+      const b={};
+      for(let i=days-1;i>=0;i--){const k=new Date(Date.now()-i*86400000).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});b[k]=0;}
+      data.forEach(d=>{const k=new Date(d.horario_msg).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});if(k in b)b[k]++;});
+      labels=Object.keys(b); counts=Object.values(b);
+    }
+    const max=Math.max(...counts,1);
+    if(tChart)tChart.destroy();
+    tChart=new Chart(ctx,{
+      type:'bar',
+      data:{labels,datasets:[{
+        data:counts,
+        backgroundColor:counts.map(v=>v===max?'#e8375a':'rgba(232,55,90,0.15)'),
+        borderRadius:6, borderWidth:0
+      }]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:ax,y:{...ax,beginAtZero:true}}}
+    });
+  }
+
+  function doInst(data){
+    const c={};
+    data.forEach(d=>{c[d.instancia]=(c[d.instancia]||0)+1;});
+    const max=Math.max(...Object.values(c),1);
+    document.getElementById('instList').innerHTML=
+      Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`
+        <div class="inst-item">
+          <div class="inst-label">${n}</div>
+          <div class="inst-bar-bg"><div class="inst-bar" style="width:${Math.round(v/max*100)}%;background:${INST_COLORS[n]||'#a0aab5'}"></div></div>
+          <div class="inst-n">${v}</div>
+        </div>`).join('');
+  }
+
+  function doCanal(data){
+    const c={};
+    data.forEach(d=>{c[d.canal]=(c[d.canal]||0)+1;});
+    const ctx=document.getElementById('canalChart').getContext('2d');
+    if(cChart)cChart.destroy();
+    cChart=new Chart(ctx,{
+      type:'doughnut',
+      data:{labels:Object.keys(c),datasets:[{data:Object.values(c),backgroundColor:Object.keys(c).map(k=>CANAL_COLORS[k]||'#a0aab5'),borderWidth:3,borderColor:'#fff',hoverOffset:8}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#6b7a8d',font:{family:'Plus Jakarta Sans',size:11,weight:'600'},padding:14,boxWidth:10}}},cutout:'68%'}
+    });
+  }
+
+  function doWeek(data){
+    const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+    const counts=new Array(7).fill(0);
+    data.forEach(d=>counts[new Date(d.horario_msg).getDay()]++);
+    const max=Math.max(...counts,1);
+    const ctx=document.getElementById('weekChart').getContext('2d');
+    if(wChart)wChart.destroy();
+    wChart=new Chart(ctx,{
+      type:'bar',
+      data:{labels:days,datasets:[{data:counts,backgroundColor:counts.map(v=>v===max?'#7ab648':'rgba(122,182,72,0.18)'),borderRadius:6,borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:ax,y:{...ax,beginAtZero:true}}}
+    });
+  }
+
+  async function doPend(){
+    try{
+      const data=await q({select:'*',tipo:'eq.recebida',respondida:'eq.false',order:'horario_msg.asc',limit:20});
+      const el=document.getElementById('pendList');
+      if(!data.length){el.innerHTML='<div class="empty-state"><div class="icon">✓</div><div>Tudo respondido!</div></div>';return;}
+      const now=Date.now();
+      el.innerHTML=data.map(d=>{
+        const mins=Math.round((now-new Date(d.horario_msg))/60000);
+        const t=mins<60?mins+'min':Math.round(mins/60)+'h';
+        return`<div class="pend-item"><span class="pend-canal">${d.canal}</span><span class="pend-session">${d.session_id}</span><span class="pend-time">${t}</span></div>`;
+      }).join('');
+    }catch(e){console.error(e);}
+  }
+
+  loadAll();
+  setInterval(loadAll,60000);
+</script>
+</body>
+</html>
