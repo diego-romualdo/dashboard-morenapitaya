@@ -31,9 +31,17 @@
     overflow-x: hidden;
   }
 
-  .sidebar { position: fixed; top: 0; left: 0; width: 220px; height: 100vh; background: var(--navy2); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 32px 0; z-index: 100; }
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 220px; height: 100vh;
+    background: var(--navy2);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 32px 0; z-index: 100;
+  }
+
   .logo { padding: 0 24px 32px; border-bottom: 1px solid var(--border); }
-  .logo-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; color: var(--rosa); }
+  .logo-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; color: var(--rosa); letter-spacing: -0.5px; }
   .logo-sub { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
 
   .nav { padding: 24px 0; flex: 1; }
@@ -48,15 +56,26 @@
   }
 
   .main { margin-left: 220px; padding: 32px; min-height: 100vh; }
-  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; }
+
+  .page-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 32px;
+  }
   .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
   .page-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
   .page-content { display: none; }
   .page-content.active { display: block; }
 
-  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; }
+  .kpi-value { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; line-height: 1; }
+  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
 
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  .chart-wrap { position: relative; height: 220px; }
+
+  .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead th { text-align: left; padding: 12px; font-size: 11px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
   tbody td { padding: 12px; border-bottom: 1px solid rgba(36,52,72,0.3); }
@@ -87,7 +106,7 @@
 
 <main class="main">
 
-  <!-- VISÃO GERAL (seu conteúdo original) -->
+  <!-- ==================== VISÃO GERAL ORIGINAL ==================== -->
   <div id="page-dashboard" class="page-content active">
     <div class="page-header">
       <div>
@@ -98,30 +117,90 @@
         <span class="live-dot"></span>Ao vivo · WhatsApp + Instagram
       </div>
     </div>
-    <!-- Seus KPIs, gráficos e tabela original ficam aqui -->
-    <!-- (cole seu conteúdo original da visão geral aqui se quiser) -->
+
+    <!-- Seus KPIs originais -->
+    <div class="kpi-grid">
+      <div class="kpi-card rosa">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-value">4.779</div>
+        <div class="kpi-label">Total de Contatos</div>
+        <div class="kpi-sub"><span>996</span> inativas · <span style="color:var(--rosa)">3.783</span> leads ativos</div>
+      </div>
+      <div class="kpi-card verde">
+        <div class="kpi-icon">💬</div>
+        <div class="kpi-value">35.383</div>
+        <div class="kpi-label">Interações Registradas</div>
+        <div class="kpi-sub">WhatsApp + Instagram combinados</div>
+      </div>
+      <div class="kpi-card gold">
+        <div class="kpi-icon">👗</div>
+        <div class="kpi-value">415</div>
+        <div class="kpi-label">Produtos Ativos</div>
+        <div class="kpi-sub"><span>Cód. 0918</span> mais consultado (725x)</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-icon">🛍️</div>
+        <div class="kpi-value">R$ 329</div>
+        <div class="kpi-label">Faturamento CRM</div>
+        <div class="kpi-sub"><span>1</span> pedido vinculado ao CRM</div>
+      </div>
+    </div>
+
+    <!-- Seus gráficos e funil originais -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="card-header"><div class="card-title">Interações por Canal · Últimos 7 dias</div></div>
+        <div class="chart-wrap"><canvas id="chartCanais"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="card-header"><div class="card-title">Funil de Vendas</div></div>
+        <div class="funil-grid">
+          <div class="funil-item"><div class="funil-count" style="color:var(--rosa)">3.783</div><div class="funil-label">Leads</div></div>
+          <div class="funil-item"><div class="funil-count" style="color:#5b8def">0</div><div class="funil-label">Prospects</div></div>
+          <div class="funil-item"><div class="funil-count" style="color:var(--gold)">0</div><div class="funil-label">Compradores</div></div>
+          <div class="funil-item"><div class="funil-count" style="color:var(--verde)">0</div><div class="funil-label">Recorrentes</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela de produtos mais consultados (sua original) -->
+    <div class="chart-card full">
+      <div class="card-header">
+        <div class="card-title">🔥 Produtos Mais Consultados</div>
+        <div class="card-badge">Top 10</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Produto</th><th>Preço</th><th style="width:200px">Consultas</th></tr>
+          </thead>
+          <tbody id="tabelaProdutos"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
-  <!-- PÁGINA DE CONTATOS COM INTEGRAÇÃO SUPABASE -->
+  <!-- ==================== PÁGINA DE CONTATOS ==================== -->
   <div id="page-contacts" class="page-content">
     <div class="page-header">
       <div>
         <div class="page-title">Contatos</div>
-        <div class="page-subtitle">Tabela: crm_contacts</div>
+        <div class="page-subtitle">Tabela crm_contacts • Carregados do Supabase</div>
       </div>
     </div>
 
     <div class="chart-card">
-      <h3 style="margin-bottom: 20px;">Lista de Contatos</h3>
-      <div id="loading" style="color:var(--muted);">Carregando contatos do Supabase...</div>
+      <h3 style="margin-bottom:20px;">Lista de Contatos</h3>
+      <div id="loading">Carregando contatos...</div>
       
-      <div class="table-wrap" style="display:none;" id="tabela-container">
+      <div id="tabela-container" style="display:none;">
         <table>
           <thead>
             <tr>
               <th>ID</th>
               <th>Nome</th>
-              <th>Remote JID</th>
+              <th>Telefone (Remote JID)</th>
               <th>Canal</th>
               <th>Estágio Funil</th>
               <th>Última Interação</th>
@@ -133,12 +212,11 @@
     </div>
   </div>
 
-  <!-- Outras páginas -->
-  <div id="page-interactions" class="page-content">
-    <div class="page-header"><div class="page-title">Interações</div></div>
-    <div class="chart-card"><p>Em breve...</p></div>
-  </div>
-  <!-- ... outras páginas ... -->
+  <!-- Outras páginas (vazias por enquanto) -->
+  <div id="page-interactions" class="page-content">...</div>
+  <div id="page-products" class="page-content">...</div>
+  <div id="page-orders" class="page-content">...</div>
+  <div id="page-pipeline" class="page-content">...</div>
 
 </main>
 
@@ -149,72 +227,20 @@ document.querySelectorAll('.nav-item').forEach(item => {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     item.classList.add('active');
 
-    document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
+    document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
     document.getElementById(`page-${item.getAttribute('data-page')}`).classList.add('active');
   });
 });
 
-// ==================== CONFIGURAÇÃO SUPABASE ====================
-// ⚠️ Substitua pela sua URL e chave real do Supabase
+// ==================== SUPABASE - CARREGAR CONTATOS ====================
 const SUPABASE_URL = 'https://supabase.morenapitaya.com';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE';
 
-// Carregar contatos quando a página de Contatos for aberta
 async function carregarContatos() {
-  const loadingEl = document.getElementById('loading');
-  const tabelaContainer = document.getElementById('tabela-container');
+  const loading = document.getElementById('loading');
+  const container = document.getElementById('tabela-container');
   const tbody = document.getElementById('tabela-contatos');
 
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/crm_contacts?select=id,nome,remote_jid,canal_principal,estagio_funil,ultima_interacao&order=id.desc&limit=50`, {
-      method: 'GET',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) throw new Error('Erro ao buscar contatos');
-
-    const contatos = await response.json();
-
-    tbody.innerHTML = '';
-
-    if (contatos.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--muted);">Nenhum contato encontrado.</td></tr>`;
-    } else {
-      contatos.forEach(c => {
-        tbody.innerHTML += `
-          <tr>
-            <td><strong>${c.id}</strong></td>
-            <td>${c.nome || 'Sem nome'}</td>
-            <td style="font-family:monospace; font-size:12px;">${c.remote_jid || '-'}</td>
-            <td><span class="canal-pill">${c.canal_principal || '—'}</span></td>
-            <td>${c.estagio_funil || '—'}</td>
-            <td>${c.ultima_interacao ? new Date(c.ultima_interacao).toLocaleString('pt-BR') : '—'}</td>
-          </tr>`;
-      });
-    }
-
-    loadingEl.style.display = 'none';
-    tabelaContainer.style.display = 'block';
-
-  } catch (error) {
-    console.error(error);
-    loadingEl.innerHTML = `<span style="color:#ff6b8a;">Erro ao carregar contatos. Verifique a chave do Supabase.</span>`;
-  }
-}
-
-// Carrega os contatos automaticamente quando a página "Contatos" é exibida
-const observer = new MutationObserver(() => {
-  if (document.getElementById('page-contacts').classList.contains('active')) {
-    carregarContatos();
-    observer.disconnect(); // carrega apenas uma vez
-  }
-});
-
-observer.observe(document.getElementById('page-contacts'), { attributes: true, attributeFilter: ['class'] });
-</script>
-</body>
-</html>
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/crm_contacts?select=id,nome,remote_jid,canal_principal,estagio_funil,ultima_interacao&order=ultima_interacao.desc&limit=100`, {
+      headers:
