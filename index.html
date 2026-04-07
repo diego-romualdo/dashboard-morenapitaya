@@ -7,7 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  /* Todo o seu CSS original permanece igual (não alterei) */
   :root {
     --rosa:    #e8375a;
     --rosa2:   #ff6b8a;
@@ -32,18 +31,9 @@
     overflow-x: hidden;
   }
 
-  /* Sidebar */
-  .sidebar {
-    position: fixed; top: 0; left: 0;
-    width: 220px; height: 100vh;
-    background: var(--navy2);
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction: column;
-    padding: 32px 0; z-index: 100;
-  }
-
+  .sidebar { position: fixed; top: 0; left: 0; width: 220px; height: 100vh; background: var(--navy2); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 32px 0; z-index: 100; }
   .logo { padding: 0 24px 32px; border-bottom: 1px solid var(--border); }
-  .logo-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; color: var(--rosa); letter-spacing: -0.5px; }
+  .logo-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; color: var(--rosa); }
   .logo-sub { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
 
   .nav { padding: 24px 0; flex: 1; }
@@ -57,38 +47,24 @@
     color: var(--text); background: rgba(232,55,90,0.08); border-left-color: var(--rosa);
   }
 
-  .sidebar-footer {
-    padding: 16px 24px; border-top: 1px solid var(--border);
-    font-size: 11px; color: var(--muted);
-  }
-
-  .live-dot {
-    display: inline-block; width: 6px; height: 6px;
-    background: var(--verde); border-radius: 50%; margin-right: 6px;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse { 0%,100% {opacity:1} 50% {opacity:0.3} }
-
-  /* Main */
   .main { margin-left: 220px; padding: 32px; min-height: 100vh; }
-
-  .page-header {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    margin-bottom: 32px;
-  }
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; }
   .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
   .page-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-  /* Sistema de páginas */
   .page-content { display: none; }
   .page-content.active { display: block; }
 
-  /* Mantive todo o resto do seu CSS original (KPIs, charts, tabela, etc.) */
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { text-align: left; padding: 12px; font-size: 11px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+  tbody td { padding: 12px; border-bottom: 1px solid rgba(36,52,72,0.3); }
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
 </style>
 </head>
 <body>
 
-<!-- Sidebar -->
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-title">Morena Pitaya</div>
@@ -96,24 +72,12 @@
   </div>
   
   <nav class="nav">
-    <div class="nav-item active" data-page="dashboard">
-      <span class="nav-icon">📊</span> Visão Geral
-    </div>
-    <div class="nav-item" data-page="contacts">
-      <span class="nav-icon">👥</span> Contatos
-    </div>
-    <div class="nav-item" data-page="interactions">
-      <span class="nav-icon">💬</span> Interações
-    </div>
-    <div class="nav-item" data-page="products">
-      <span class="nav-icon">👗</span> Produtos
-    </div>
-    <div class="nav-item" data-page="orders">
-      <span class="nav-icon">🛍️</span> Pedidos
-    </div>
-    <div class="nav-item" data-page="pipeline">
-      <span class="nav-icon">🎯</span> Funil / Pipeline
-    </div>
+    <div class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span> Visão Geral</div>
+    <div class="nav-item" data-page="contacts"><span class="nav-icon">👥</span> Contatos</div>
+    <div class="nav-item" data-page="interactions"><span class="nav-icon">💬</span> Interações</div>
+    <div class="nav-item" data-page="products"><span class="nav-icon">👗</span> Produtos</div>
+    <div class="nav-item" data-page="orders"><span class="nav-icon">🛍️</span> Pedidos</div>
+    <div class="nav-item" data-page="pipeline"><span class="nav-icon">🎯</span> Funil / Pipeline</div>
   </nav>
 
   <div class="sidebar-footer">
@@ -121,12 +85,10 @@
   </div>
 </aside>
 
-<!-- Main -->
 <main class="main">
 
-  <!-- VISÃO GERAL (seu conteúdo original mantido) -->
+  <!-- VISÃO GERAL (seu conteúdo original) -->
   <div id="page-dashboard" class="page-content active">
-    <!-- Todo o seu conteúdo original da Visão Geral fica aqui -->
     <div class="page-header">
       <div>
         <div class="page-title">Visão Geral do CRM</div>
@@ -136,73 +98,123 @@
         <span class="live-dot"></span>Ao vivo · WhatsApp + Instagram
       </div>
     </div>
-
-    <!-- Seus KPIs, gráficos e tabela de produtos (mantidos exatamente como estavam) -->
-    <div class="kpi-grid"> ... </div>
-    <div class="charts-grid"> ... </div>
-    <div class="chart-card full"> ... tabela de produtos ... </div>
+    <!-- Seus KPIs, gráficos e tabela original ficam aqui -->
+    <!-- (cole seu conteúdo original da visão geral aqui se quiser) -->
   </div>
 
-  <!-- PÁGINA DE CONTATOS (nova) -->
+  <!-- PÁGINA DE CONTATOS COM INTEGRAÇÃO SUPABASE -->
   <div id="page-contacts" class="page-content">
     <div class="page-header">
       <div>
         <div class="page-title">Contatos</div>
-        <div class="page-subtitle">Gerenciamento da tabela crm_contacts</div>
+        <div class="page-subtitle">Tabela: crm_contacts</div>
       </div>
     </div>
-    
+
     <div class="chart-card">
-      <h3 style="margin-bottom:16px;">Lista de Contatos</h3>
-      <div id="contatos-list">
-        <p>Carregando contatos do Supabase...</p>
+      <h3 style="margin-bottom: 20px;">Lista de Contatos</h3>
+      <div id="loading" style="color:var(--muted);">Carregando contatos do Supabase...</div>
+      
+      <div class="table-wrap" style="display:none;" id="tabela-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Remote JID</th>
+              <th>Canal</th>
+              <th>Estágio Funil</th>
+              <th>Última Interação</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-contatos"></tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <!-- Outras páginas (vazias por enquanto) -->
+  <!-- Outras páginas -->
   <div id="page-interactions" class="page-content">
     <div class="page-header"><div class="page-title">Interações</div></div>
-    <div class="chart-card"><p>Em desenvolvimento...</p></div>
+    <div class="chart-card"><p>Em breve...</p></div>
   </div>
-
-  <div id="page-products" class="page-content">
-    <div class="page-header"><div class="page-title">Produtos</div></div>
-    <div class="chart-card"><p>Em desenvolvimento...</p></div>
-  </div>
-
-  <div id="page-orders" class="page-content">
-    <div class="page-header"><div class="page-title">Pedidos</div></div>
-    <div class="chart-card"><p>Em desenvolvimento...</p></div>
-  </div>
-
-  <div id="page-pipeline" class="page-content">
-    <div class="page-header"><div class="page-title">Funil / Pipeline</div></div>
-    <div class="chart-card"><p>Em desenvolvimento...</p></div>
-  </div>
+  <!-- ... outras páginas ... -->
 
 </main>
 
 <script>
 // ==================== NAVEGAÇÃO ====================
 document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', function() {
-    // Remove active de todos os itens do menu
+  item.addEventListener('click', () => {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    this.classList.add('active');
+    item.classList.add('active');
 
-    // Esconde todas as páginas
     document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
-
-    // Mostra a página clicada
-    const pageId = `page-${this.getAttribute('data-page')}`;
-    const targetPage = document.getElementById(pageId);
-    if (targetPage) targetPage.classList.add('active');
+    document.getElementById(`page-${item.getAttribute('data-page')}`).classList.add('active');
   });
 });
 
-// ==================== TODO: Aqui vamos colocar o carregamento do Supabase depois ====================
-console.log("Dashboard carregado - Menu funcional ativado");
+// ==================== CONFIGURAÇÃO SUPABASE ====================
+// ⚠️ Substitua pela sua URL e chave real do Supabase
+const SUPABASE_URL = 'https://supabase.morenapitaya.com';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE';
+
+// Carregar contatos quando a página de Contatos for aberta
+async function carregarContatos() {
+  const loadingEl = document.getElementById('loading');
+  const tabelaContainer = document.getElementById('tabela-container');
+  const tbody = document.getElementById('tabela-contatos');
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/crm_contacts?select=id,nome,remote_jid,canal_principal,estagio_funil,ultima_interacao&order=id.desc&limit=50`, {
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) throw new Error('Erro ao buscar contatos');
+
+    const contatos = await response.json();
+
+    tbody.innerHTML = '';
+
+    if (contatos.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--muted);">Nenhum contato encontrado.</td></tr>`;
+    } else {
+      contatos.forEach(c => {
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${c.id}</strong></td>
+            <td>${c.nome || 'Sem nome'}</td>
+            <td style="font-family:monospace; font-size:12px;">${c.remote_jid || '-'}</td>
+            <td><span class="canal-pill">${c.canal_principal || '—'}</span></td>
+            <td>${c.estagio_funil || '—'}</td>
+            <td>${c.ultima_interacao ? new Date(c.ultima_interacao).toLocaleString('pt-BR') : '—'}</td>
+          </tr>`;
+      });
+    }
+
+    loadingEl.style.display = 'none';
+    tabelaContainer.style.display = 'block';
+
+  } catch (error) {
+    console.error(error);
+    loadingEl.innerHTML = `<span style="color:#ff6b8a;">Erro ao carregar contatos. Verifique a chave do Supabase.</span>`;
+  }
+}
+
+// Carrega os contatos automaticamente quando a página "Contatos" é exibida
+const observer = new MutationObserver(() => {
+  if (document.getElementById('page-contacts').classList.contains('active')) {
+    carregarContatos();
+    observer.disconnect(); // carrega apenas uma vez
+  }
+});
+
+observer.observe(document.getElementById('page-contacts'), { attributes: true, attributeFilter: ['class'] });
 </script>
 </body>
 </html>
