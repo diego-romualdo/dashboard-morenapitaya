@@ -31,84 +31,426 @@
     overflow-x: hidden;
   }
 
-  /* Sidebar */
+  /* ── Sidebar ── */
   .sidebar {
-    position: fixed; top: 0; left: 0;
-    width: 220px; height: 100vh;
+    position: fixed;
+    top: 0; left: 0;
+    width: 220px;
+    height: 100vh;
     background: var(--navy2);
     border-right: 1px solid var(--border);
-    display: flex; flex-direction: column;
-    padding: 32px 0; z-index: 100;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 0;
+    z-index: 100;
   }
 
-  .logo { padding: 0 24px 32px; border-bottom: 1px solid var(--border); }
+  .logo {
+    padding: 0 24px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
   .logo-title {
     font-family: 'Playfair Display', serif;
-    font-size: 18px; font-weight: 900; color: var(--rosa);
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--rosa);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
   }
-  .logo-sub { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
 
-  .nav { padding: 24px 0; flex: 1; }
+  .logo-sub {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .nav {
+    padding: 24px 0;
+    flex: 1;
+  }
+
   .nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 24px; font-size: 13.5px; color: var(--muted);
-    cursor: pointer; transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 24px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
     border-left: 3px solid transparent;
   }
+
   .nav-item:hover, .nav-item.active {
-    color: var(--text); background: rgba(232,55,90,0.08); border-left-color: var(--rosa);
+    color: var(--text);
+    background: rgba(232,55,90,0.08);
+    border-left-color: var(--rosa);
   }
-  .nav-icon { font-size: 17px; }
+
+  .nav-icon { font-size: 16px; }
 
   .sidebar-footer {
-    padding: 16px 24px; border-top: 1px solid var(--border);
-    font-size: 11px; color: var(--muted);
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
   }
 
   .live-dot {
-    display: inline-block; width: 6px; height: 6px;
-    background: var(--verde); border-radius: 50%; margin-right: 6px;
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--verde);
+    border-radius: 50%;
+    margin-right: 6px;
     animation: pulse 2s infinite;
   }
-  @keyframes pulse { 0%,100% {opacity:1} 50% {opacity:0.3} }
 
-  /* Main */
-  .main { margin-left: 220px; padding: 32px; min-height: 100vh; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ── Main ── */
+  .main {
+    margin-left: 220px;
+    padding: 32px;
+    min-height: 100vh;
+  }
 
   .page-header {
-    display: flex; align-items: flex-start; justify-content: space-between;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
     margin-bottom: 32px;
   }
-  .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
-  .page-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-  .page-content { display: none; }
-  .page-content.active { display: block; }
-
-  /* Seu CSS original (KPIs, cards, tabelas, etc.) - mantido completo */
-  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-  .kpi-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    padding: 20px; position: relative; overflow: hidden;
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
   }
-  .kpi-value { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; }
-  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
 
-  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
-  .chart-wrap { position: relative; height: 220px; }
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
 
-  .funil-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .funil-item { text-align: center; padding: 16px 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--navy3); }
+  .update-badge {
+    background: rgba(122,182,72,0.15);
+    border: 1px solid rgba(122,182,72,0.3);
+    color: var(--verde);
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead th { text-align: left; padding: 10px 12px; font-size: 10px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
-  tbody td { padding: 10px 12px; }
+  /* ── KPI Grid ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
 
-  /* Responsivo */
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--rosa);
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 60px; height: 60px;
+    border-radius: 0 12px 0 60px;
+    opacity: 0.15;
+  }
+
+  .kpi-card.rosa::before  { background: var(--rosa); }
+  .kpi-card.verde::before { background: var(--verde); }
+  .kpi-card.gold::before  { background: var(--gold); }
+  .kpi-card.blue::before  { background: #5b8def; }
+
+  .kpi-icon {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .kpi-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 6px;
+  }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .kpi-sub span {
+    color: var(--verde);
+    font-weight: 600;
+  }
+
+  /* ── Charts Grid ── */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    animation: fadeUp 0.5s ease 0.2s both;
+  }
+
+  .chart-card.full {
+    grid-column: 1 / -1;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .card-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: rgba(232,55,90,0.15);
+    color: var(--rosa);
+    border: 1px solid rgba(232,55,90,0.3);
+  }
+
+  .chart-wrap {
+    position: relative;
+    height: 220px;
+  }
+
+  /* ── Funil ── */
+  .funil-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .funil-item {
+    text-align: center;
+    padding: 16px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--navy3);
+    transition: all 0.2s;
+  }
+
+  .funil-item:hover {
+    border-color: var(--rosa);
+    background: rgba(232,55,90,0.05);
+  }
+
+  .funil-count {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .funil-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  .funil-bar {
+    height: 3px;
+    border-radius: 2px;
+    margin-top: 10px;
+  }
+
+  /* ── Tabela produtos ── */
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(36,52,72,0.5);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover {
+    background: rgba(255,255,255,0.03);
+  }
+
+  tbody td {
+    padding: 10px 12px;
+    color: var(--text);
+  }
+
+  .rank {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  .rank-1 { color: var(--gold); }
+  .rank-2 { color: #c0c0c0; }
+  .rank-3 { color: #cd7f32; }
+
+  .produto-nome {
+    font-weight: 500;
+  }
+
+  .produto-cod {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .preco {
+    color: var(--verde);
+    font-weight: 600;
+  }
+
+  .consultas-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bar-bg {
+    flex: 1;
+    height: 4px;
+    background: var(--navy3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--rosa), var(--rosa2));
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  .consultas-num {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rosa);
+    min-width: 36px;
+    text-align: right;
+  }
+
+  /* ── Bottom grid ── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ── Animações ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .kpi-card:nth-child(1) { animation-delay: 0.0s; }
+  .kpi-card:nth-child(2) { animation-delay: 0.1s; }
+  .kpi-card:nth-child(3) { animation-delay: 0.2s; }
+  .kpi-card:nth-child(4) { animation-delay: 0.3s; }
+
+  /* ── Canal pills ── */
+  .canal-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  .canal-ig {
+    background: rgba(232,55,90,0.15);
+    color: var(--rosa);
+    border: 1px solid rgba(232,55,90,0.3);
+  }
+
+  .canal-wa {
+    background: rgba(122,182,72,0.15);
+    color: var(--verde);
+    border: 1px solid rgba(122,182,72,0.3);
+  }
+
   @media (max-width: 1200px) {
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+    .bottom-grid { grid-template-columns: 1fr; }
+    .funil-grid { grid-template-columns: repeat(2, 1fr); }
   }
+
   @media (max-width: 768px) {
     .sidebar { display: none; }
     .main { margin-left: 0; padding: 16px; }
@@ -123,150 +465,307 @@
     <div class="logo-title">Morena Pitaya</div>
     <div class="logo-sub">CRM Dashboard</div>
   </div>
-  
   <nav class="nav">
-    <div class="nav-item active" data-page="dashboard"> <span class="nav-icon">📊</span> Visão Geral </div>
-    <div class="nav-item" data-page="contacts"> <span class="nav-icon">👥</span> Contatos </div>
-    <div class="nav-item" data-page="interactions"> <span class="nav-icon">💬</span> Interações </div>
-    <div class="nav-item" data-page="products"> <span class="nav-icon">👗</span> Produtos </div>
-    <div class="nav-item" data-page="orders"> <span class="nav-icon">🛍️</span> Pedidos </div>
-    <div class="nav-item" data-page="pipeline"> <span class="nav-icon">🎯</span> Funil / Pipeline </div>
+    <div class="nav-item active"><span class="nav-icon">📊</span> Visão Geral</div>
+    <div class="nav-item"><span class="nav-icon">👥</span> Contatos</div>
+    <div class="nav-icon"></div>
+    <div class="nav-item"><span class="nav-icon">💬</span> Interações</div>
+    <div class="nav-item"><span class="nav-icon">👗</span> Produtos</div>
+    <div class="nav-item"><span class="nav-icon">🛍️</span> Pedidos</div>
+    <div class="nav-item"><span class="nav-icon">🎯</span> Funil</div>
   </nav>
-
   <div class="sidebar-footer">
     <span class="live-dot"></span>Dados em tempo real
+    <div style="margin-top:6px;font-size:10px;">Atualizado agora</div>
   </div>
 </aside>
 
-<!-- Main Content -->
+<!-- Main -->
 <main class="main">
 
-  <!-- ==================== VISÃO GERAL ==================== -->
-  <div id="page-dashboard" class="page-content active">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Visão Geral do CRM</div>
-        <div class="page-subtitle">Morena Pitaya Plus Size · Abril 2026</div>
-      </div>
-      <div class="update-badge">
-        <span class="live-dot"></span> Ao vivo · WhatsApp + Instagram
-      </div>
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Visão Geral do CRM</div>
+      <div class="page-subtitle">Morena Pitaya Plus Size · Abril 2026</div>
     </div>
-
-    <!-- KPIs -->
-    <div class="kpi-grid">
-      <div class="kpi-card rosa">
-        <div class="kpi-icon">👥</div>
-        <div class="kpi-value">4.779</div>
-        <div class="kpi-label">Total de Contatos</div>
-        <div class="kpi-sub"><span>996</span> inativas · <span style="color:var(--rosa)">3.783</span> leads ativos</div>
-      </div>
-      <div class="kpi-card verde">
-        <div class="kpi-icon">💬</div>
-        <div class="kpi-value">35.383</div>
-        <div class="kpi-label">Interações Registradas</div>
-        <div class="kpi-sub">WhatsApp + Instagram combinados</div>
-      </div>
-      <div class="kpi-card gold">
-        <div class="kpi-icon">👗</div>
-        <div class="kpi-value">415</div>
-        <div class="kpi-label">Produtos Ativos</div>
-        <div class="kpi-sub"><span>Cód. 0918</span> mais consultado (725x)</div>
-      </div>
-      <div class="kpi-card blue">
-        <div class="kpi-icon">🛍️</div>
-        <div class="kpi-value">R$ 329</div>
-        <div class="kpi-label">Faturamento CRM</div>
-        <div class="kpi-sub"><span>1</span> pedido vinculado ao CRM</div>
-      </div>
+    <div class="update-badge">
+      <span class="live-dot"></span>
+      Ao vivo · WhatsApp + Instagram
     </div>
+  </div>
 
-    <!-- Gráficos -->
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="card-header">
-          <div class="card-title">Interações por Canal · Últimos 7 dias</div>
-        </div>
-        <div class="chart-wrap"><canvas id="chartCanais"></canvas></div>
-      </div>
-
-      <div class="chart-card">
-        <div class="card-header">
-          <div class="card-title">Funil de Vendas</div>
-        </div>
-        <div class="funil-grid">
-          <div class="funil-item"><div class="funil-count" style="color:var(--rosa)">3.783</div><div class="funil-label">Leads</div></div>
-          <div class="funil-item"><div class="funil-count" style="color:#5b8def">0</div><div class="funil-label">Prospects</div></div>
-          <div class="funil-item"><div class="funil-count" style="color:var(--gold)">0</div><div class="funil-label">Compradores</div></div>
-          <div class="funil-item"><div class="funil-count" style="color:var(--verde)">0</div><div class="funil-label">Recorrentes</div></div>
-        </div>
-      </div>
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card rosa">
+      <div class="kpi-icon">👥</div>
+      <div class="kpi-value">4.779</div>
+      <div class="kpi-label">Total de Contatos</div>
+      <div class="kpi-sub"><span>996</span> inativas · <span style="color:var(--rosa)">3.783</span> leads ativos</div>
     </div>
+    <div class="kpi-card verde">
+      <div class="kpi-icon">💬</div>
+      <div class="kpi-value">35.383</div>
+      <div class="kpi-label">Interações Registradas</div>
+      <div class="kpi-sub">WhatsApp + Instagram combinados</div>
+    </div>
+    <div class="kpi-card gold">
+      <div class="kpi-icon">👗</div>
+      <div class="kpi-value">415</div>
+      <div class="kpi-label">Produtos Ativos</div>
+      <div class="kpi-sub"><span>Cód. 0918</span> mais consultado (725x)</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-icon">🛍️</div>
+      <div class="kpi-value">R$ 329</div>
+      <div class="kpi-label">Faturamento CRM</div>
+      <div class="kpi-sub"><span>1</span> pedido vinculado ao CRM</div>
+    </div>
+  </div>
 
-    <!-- Produtos mais consultados -->
-    <div class="chart-card" style="margin-bottom:24px">
+  <!-- Charts row 1 -->
+  <div class="charts-grid">
+    <div class="chart-card">
       <div class="card-header">
-        <div class="card-title">🔥 Produtos Mais Consultados</div>
-        <div class="card-badge">Top 10</div>
+        <div class="card-title">Interações por Canal · Últimos 7 dias</div>
+        <div class="card-badge">7 dias</div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>#</th><th>Produto</th><th>Preço</th><th style="width:200px">Consultas</th></tr>
-          </thead>
-          <tbody id="tabelaProdutos"></tbody>
-        </table>
+      <div class="chart-wrap">
+        <canvas id="chartCanais"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-header">
+        <div class="card-title">Funil de Vendas</div>
+        <div class="card-badge">Atual</div>
+      </div>
+      <div class="funil-grid">
+        <div class="funil-item">
+          <div class="funil-count" style="color:var(--rosa)">3.783</div>
+          <div class="funil-label">Leads</div>
+          <div class="funil-bar" style="background:var(--rosa)"></div>
+        </div>
+        <div class="funil-item">
+          <div class="funil-count" style="color:#5b8def">0</div>
+          <div class="funil-label">Prospects</div>
+          <div class="funil-bar" style="background:#5b8def"></div>
+        </div>
+        <div class="funil-item">
+          <div class="funil-count" style="color:var(--gold)">0</div>
+          <div class="funil-label">Compradores</div>
+          <div class="funil-bar" style="background:var(--gold)"></div>
+        </div>
+        <div class="funil-item">
+          <div class="funil-count" style="color:var(--verde)">0</div>
+          <div class="funil-label">Recorrentes</div>
+          <div class="funil-bar" style="background:var(--verde)"></div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:rgba(232,55,90,0.05);border-radius:8px;border:1px solid rgba(232,55,90,0.15)">
+        <div style="font-size:11px;color:var(--muted)">⚠️ Funil em calibração — a integração de pedidos foi ativada hoje. Os estágios serão atualizados conforme novos pedidos chegarem via webhook.</div>
       </div>
     </div>
   </div>
 
-  <!-- Outras páginas -->
-  <div id="page-contacts" class="page-content">
-    <div class="page-header"><div class="page-title">Contatos</div></div>
-    <p>Conteúdo da tabela <strong>crm_contacts</strong> será carregado aqui em breve.</p>
+  <!-- Produtos mais consultados -->
+  <div class="chart-card full" style="margin-bottom:24px">
+    <div class="card-header">
+      <div class="card-title">🔥 Produtos Mais Consultados</div>
+      <div class="card-badge">Top 10</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Produto</th>
+            <th>Preço</th>
+            <th style="width:200px">Consultas</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaProdutos"></tbody>
+      </table>
+    </div>
   </div>
 
-  <div id="page-interactions" class="page-content">
-    <div class="page-header"><div class="page-title">Interações</div></div>
-    <p>Conteúdo da tabela <strong>crm_interactions</strong>.</p>
-  </div>
+  <!-- Bottom -->
+  <div class="bottom-grid">
+    <div class="chart-card">
+      <div class="card-header">
+        <div class="card-title">Distribuição por Canal</div>
+        <div class="card-badge">Total</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartDoughnut"></canvas>
+      </div>
+    </div>
 
-  <div id="page-products" class="page-content">
-    <div class="page-header"><div class="page-title">Produtos</div></div>
-    <p>Conteúdo da tabela <strong>crm_products</strong>.</p>
-  </div>
-
-  <div id="page-orders" class="page-content">
-    <div class="page-header"><div class="page-title">Pedidos</div></div>
-    <p>Conteúdo da tabela <strong>crm_orders</strong>.</p>
-  </div>
-
-  <div id="page-pipeline" class="page-content">
-    <div class="page-header"><div class="page-title">Funil / Pipeline</div></div>
-    <p>Visualização do funil de vendas.</p>
+    <div class="chart-card">
+      <div class="card-header">
+        <div class="card-title">📈 Resumo de Performance</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--navy3);border-radius:8px">
+          <div>
+            <div style="font-size:12px;color:var(--muted)">Média diária de interações</div>
+            <div style="font-size:20px;font-family:'Playfair Display',serif;font-weight:700;margin-top:2px">485</div>
+          </div>
+          <div style="font-size:24px">📩</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--navy3);border-radius:8px">
+          <div>
+            <div style="font-size:12px;color:var(--muted)">Canal dominante</div>
+            <div style="margin-top:4px"><span class="canal-pill canal-ig">📷 Instagram · 83%</span></div>
+          </div>
+          <div style="font-size:24px">📊</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--navy3);border-radius:8px">
+          <div>
+            <div style="font-size:12px;color:var(--muted)">Produto mais quente</div>
+            <div style="font-size:13px;font-weight:600;margin-top:2px;color:var(--rosa)">Corselet Rendado · Cód. 0918</div>
+            <div style="font-size:11px;color:var(--muted)">725 consultas · R$ 299,90</div>
+          </div>
+          <div style="font-size:24px">🏆</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--navy3);border-radius:8px">
+          <div>
+            <div style="font-size:12px;color:var(--muted)">Contatos novos (últimos 7 dias)</div>
+            <div style="font-size:20px;font-family:'Playfair Display',serif;font-weight:700;margin-top:2px;color:var(--verde)">+147</div>
+          </div>
+          <div style="font-size:24px">✨</div>
+        </div>
+      </div>
+    </div>
   </div>
 
 </main>
 
 <script>
-// === NAVEGAÇÃO ===
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    item.classList.add('active');
+// ── Dados ──────────────────────────────────────────────
+const dadosCanais = [
+  { dia: '01/04', ig: 457, wa: 118 },
+  { dia: '02/04', ig: 584, wa: 229 },
+  { dia: '03/04', ig: 926, wa: 159 },
+  { dia: '04/04', ig: 661, wa: 73  },
+  { dia: '05/04', ig: 319, wa: 1   },
+  { dia: '06/04', ig: 403, wa: 210 },
+  { dia: '07/04', ig: 96,  wa: 6   },
+];
 
-    document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
-    
-    const pageName = item.getAttribute('data-page');
-    document.getElementById(`page-${pageName}`).classList.add('active');
-  });
+const produtos = [
+  { rank: 1, codigo: '0918', nome: 'Corselet Plus Size Rendado',               preco: 'R$ 299,90', consultas: 725 },
+  { rank: 2, codigo: '0888', nome: 'Vestido Plus Size Zíper',                  preco: 'R$ 349,90', consultas: 607 },
+  { rank: 3, codigo: '0773', nome: 'Blazer Plus Size Alfaiataria Forrado',     preco: 'R$ 499,90', consultas: 602 },
+  { rank: 4, codigo: '0411', nome: 'Calça Plus Size com Patches Colados',      preco: 'R$ 699,90', consultas: 581 },
+  { rank: 5, codigo: '0977', nome: 'Calça Cargo Off',                          preco: 'R$ 189,90', consultas: 518 },
+  { rank: 6, codigo: '0919', nome: 'Calça Cargo Plus Size Preta',              preco: 'R$ 249,90', consultas: 450 },
+  { rank: 7, codigo: '0462', nome: 'Calça Plus Size Pantalona Linho',          preco: 'R$ 499,90', consultas: 435 },
+  { rank: 8, codigo: '0985', nome: 'Cropped Preto Com Paetê',                  preco: 'R$ 239,90', consultas: 397 },
+  { rank: 9, codigo: '0930', nome: 'Calça Pantalona Plus Size',                preco: 'R$ 229,99', consultas: 345 },
+  { rank:10, codigo: '0046', nome: 'Calça Plus Size Flare com Zíper',          preco: 'R$ 319,90', consultas: 331 },
+];
+
+const maxConsultas = produtos[0].consultas;
+
+// ── Tabela de produtos ──────────────────────────────────
+const tbody = document.getElementById('tabelaProdutos');
+produtos.forEach(p => {
+  const rankClass = p.rank <= 3 ? `rank-${p.rank}` : '';
+  const pct = Math.round((p.consultas / maxConsultas) * 100);
+  tbody.innerHTML += `
+    <tr>
+      <td><span class="rank ${rankClass}">${p.rank}</span></td>
+      <td>
+        <div class="produto-nome">${p.nome}</div>
+        <div class="produto-cod">Cód. ${p.codigo}</div>
+      </td>
+      <td class="preco">${p.preco}</td>
+      <td>
+        <div class="consultas-bar">
+          <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <div class="consultas-num">${p.consultas}</div>
+        </div>
+      </td>
+    </tr>`;
 });
 
-// === DADOS DA VISÃO GERAL (mantidos) ===
-const produtos = [
-  { rank: 1, codigo: '0918', nome: 'Corselet Plus Size Rendado', preco: 'R$ 299,90', consultas: 725 },
-  { rank: 2, codigo: '0888', nome: 'Vestido Plus Size Zíper', preco: 'R$ 349,90', consultas: 607 },
-  { rank: 3, codigo: '0773', nome: 'Blazer Plus Size Alfaiataria Forrado', preco: 'R$ 499,90', consultas: 602 },
-  { rank: 4, codigo: '0411', nome: 'Calça Plus Size com Patches Colados', preco: 'R$ 699,90', consultas: 581 },
-  { rank: 5, codigo: '0977', nome: 'Calça Cargo Off', preco: 'R$ 189,90', consultas: 518 },
-  { rank: 6, codigo: '0919', nome: 'Calça Cargo Plus Size Preta
+// ── Chart: Canais por dia ──────────────────────────────
+const ctxCanais = document.getElementById('chartCanais').getContext('2d');
+new Chart(ctxCanais, {
+  type: 'bar',
+  data: {
+    labels: dadosCanais.map(d => d.dia),
+    datasets: [
+      {
+        label: 'Instagram',
+        data: dadosCanais.map(d => d.ig),
+        backgroundColor: 'rgba(232,55,90,0.8)',
+        borderRadius: 4,
+      },
+      {
+        label: 'WhatsApp',
+        data: dadosCanais.map(d => d.wa),
+        backgroundColor: 'rgba(122,182,72,0.8)',
+        borderRadius: 4,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: { color: '#7a94b0', font: { size: 11 } }
+      }
+    },
+    scales: {
+      x: {
+        stacked: false,
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        ticks: { color: '#7a94b0', font: { size: 11 } }
+      },
+      y: {
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        ticks: { color: '#7a94b0', font: { size: 11 } }
+      }
+    }
+  }
+});
+
+// ── Chart: Doughnut canal total ──────────────────────
+const totalIG = dadosCanais.reduce((s,d) => s + d.ig, 0);
+const totalWA = dadosCanais.reduce((s,d) => s + d.wa, 0);
+
+const ctxDoughnut = document.getElementById('chartDoughnut').getContext('2d');
+new Chart(ctxDoughnut, {
+  type: 'doughnut',
+  data: {
+    labels: ['Instagram', 'WhatsApp'],
+    datasets: [{
+      data: [totalIG, totalWA],
+      backgroundColor: ['rgba(232,55,90,0.85)', 'rgba(122,182,72,0.85)'],
+      borderColor: ['#e8375a', '#7ab648'],
+      borderWidth: 2,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '68%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: '#7a94b0',
+          font: { size: 12 },
+          padding: 16
+        }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
