@@ -51,7 +51,6 @@
 
         .status-alert { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; background: rgba(232, 55, 90, 0.15); color: var(--rosa); border: 1px solid rgba(232,55,90,0.3); }
         .btn-wa { background: #25d366; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; text-decoration: none; display: inline-block; }
-        .badge-atendimento { background: var(--verde); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
 
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; padding: 16px; } }
@@ -88,7 +87,7 @@
 
     <section id="geral" class="tab-content active">
         <div class="kpi-grid">
-            <div class="kpi-card"><div class="kpi-value">4.779</div><div class="kpi-label">Leads</div></div>
+            <div class="kpi-card"><div class="kpi-value" id="kpi-leads">4.800</div><div class="kpi-label">Leads</div></div>
             <div class="kpi-card"><div class="kpi-value" id="kpi-interacoes">35.383</div><div class="kpi-label">Interações</div></div>
         </div>
         <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
@@ -97,12 +96,10 @@
     <section id="reativacao" class="tab-content">
         <div class="chart-card">
             <h3>🚨 Prioridade de Reativação (7 a 14 dias sem contato)</h3>
-            <p style="font-size: 12px; color: var(--muted); margin-bottom: 15px;">Listando os 20 contatos com maior volume histórico de interação.</p>
+            <p style="font-size: 12px; color: var(--muted); margin-bottom: 15px;">Listando os contatos com maior volume de interação no período selecionado.</p>
             <div style="overflow-x: auto;">
                 <table>
-                    <thead>
-                        <tr><th>Cliente</th><th>Inatividade</th><th>Interações Totais</th><th>Código Mais Chamado</th><th>Ação</th></tr>
-                    </thead>
+                    <thead><tr><th>Cliente</th><th>Inatividade</th><th>Interações</th><th>Código</th><th>Ação</th></tr></thead>
                     <tbody id="listaReativacao"></tbody>
                 </table>
             </div>
@@ -111,25 +108,25 @@
 
     <section id="interacoes" class="tab-content">
         <div class="chart-card">
-            <h3>💬 Feed de Atendimento Recente</h3>
-            <table>
-                <thead><tr><th>Hora</th><th>Cliente</th><th>Mensagem</th><th>Canal</th><th>Status</th></tr></thead>
-                <tbody>
-                    <tr><td>22:45</td><td>Aline Ferreira</td><td>"Ainda tem o GG do 0918?"</td><td>WhatsApp</td><td><span class="badge-atendimento">Aguardando</span></td></tr>
-                </tbody>
-            </table>
+            <h3>💬 Feed de Atendimento do Período</h3>
+            <div id="feedInteracoes">
+                <table>
+                    <thead><tr><th>Hora/Data</th><th>Cliente</th><th>Canal</th></tr></thead>
+                    <tbody id="listaFeed"></tbody>
+                </table>
+            </div>
         </div>
     </section>
 
     <section id="produtos" class="tab-content">
         <div class="chart-card">
-            <h3>👗 Desempenho por Referência</h3>
-            <table>
-                <thead><tr><th>Cód</th><th>Produto</th><th>Consultas</th><th>Conversão</th></tr></thead>
-                <tbody>
-                    <tr><td><strong>0918</strong></td><td>Corselet Rendado</td><td>842</td><td>12%</td></tr>
-                </tbody>
-            </table>
+            <h3>👗 Top Produtos no Período</h3>
+            <tbody id="listaProdutos">
+                <table>
+                    <thead><tr><th>Cód</th><th>Referência</th><th>Interesse</th></tr></thead>
+                    <tbody id="listaProdutosBody"></tbody>
+                </table>
+            </tbody>
         </div>
     </section>
 </main>
@@ -138,44 +135,54 @@
 let myChart;
 Chart.register(ChartDataLabels);
 
+// BANCO DE DADOS DINÂMICO - Agora tudo muda ao trocar a aba/filtro
 const db = {
-    'hoje': { interacoes: 1240, labels: ['00h', '06h', '12h', '18h', 'Agora'], data: [15, 8, 310, 520, 108] },
-    '7d': { interacoes: 35383, labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'], data: [450, 580, 920, 660, 310, 400, 90] },
-    '30d': { interacoes: 120400, labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'], data: [2500, 3100, 2800, 3400] },
-    'max': { interacoes: 450000, labels: ['Jan', 'Fev', 'Mar', 'Abr'], data: [12000, 15000, 18000, 22000] }
+    'hoje': { 
+        leads: 42, interacoes: 1240, 
+        labels: ['00h', '06h', '12h', '18h', 'Agora'], 
+        data: [15, 8, 310, 520, 108],
+        produtos: [{cod: '0918', nome: 'Corselet', qtd: 45}, {cod: '0888', nome: 'Vestido', qtd: 32}]
+    },
+    '7d': { 
+        leads: 4800, interacoes: 35383, 
+        labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'], 
+        data: [450, 580, 920, 660, 310, 400, 90],
+        produtos: [{cod: '0918', nome: 'Corselet', qtd: 842}, {cod: '0773', nome: 'Blazer', qtd: 410}]
+    },
+    '30d': { 
+        leads: 5120, interacoes: 120400, 
+        labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'], 
+        data: [2500, 3100, 2800, 3400],
+        produtos: [{cod: '0411', nome: 'Calça', qtd: 1200}, {cod: '0918', nome: 'Corselet', qtd: 980}]
+    },
+    'max': { 
+        leads: 6400, interacoes: 450000, 
+        labels: ['Jan', 'Fev', 'Mar', 'Abr'], 
+        data: [12000, 15000, 18000, 22000],
+        produtos: [{cod: '0918', nome: 'Corselet', qtd: 5400}, {cod: '0888', nome: 'Vestido', qtd: 4200}]
+    }
 };
 
-// Dados simulados com números de telefone para teste
-const baseClientes = Array.from({length: 50}, (_, i) => ({
+const baseClientes = Array.from({length: 40}, (_, i) => ({
     nome: `Cliente Plus ${i+1}`,
-    telefone: "5531999999999", // Exemplo de formato internacional
-    diasInativo: Math.floor(Math.random() * (15 - 5 + 1) + 5),
-    totalInteracoes: Math.floor(Math.random() * 500),
-    ultimoCodigo: ["0918", "0888", "0773", "0411"][Math.floor(Math.random() * 4)]
+    tel: "5531999999999",
+    dias: Math.floor(Math.random() * (13 - 8 + 1) + 8),
+    interacoes: Math.floor(Math.random() * 500),
+    cod: ["0918", "0888", "0773", "0411"][Math.floor(Math.random() * 4)]
 }));
 
-function renderReativacao() {
-    const filtrados = baseClientes
-        .filter(c => c.diasInativo > 7 && c.diasInativo < 14)
-        .sort((a, b) => b.totalInteracoes - a.totalInteracoes)
-        .slice(0, 20);
-
-    const lista = document.getElementById('listaReativacao');
-    lista.innerHTML = filtrados.map(c => {
-        // Criando a mensagem personalizada para o WhatsApp
-        const mensagem = encodeURIComponent(`Olá ${c.nome}! Tudo bem? Notei que você gostou do nosso modelo ${c.ultimoCodigo} e não queria que você perdesse as novidades. Podemos te ajudar com algo?`);
-        const waLink = `https://wa.me/${c.telefone}?text=${mensagem}`;
-
-        return `
-            <tr>
-                <td><strong>${c.nome}</strong></td>
-                <td><span class="status-alert">${c.diasInativo} dias</span></td>
-                <td>${c.totalInteracoes}</td>
-                <td><strong>${c.ultimoCodigo}</strong></td>
-                <td><a href="${waLink}" target="_blank" class="btn-wa">WhatsApp</a></td>
-            </tr>
-        `;
+function renderTabelas(periodo) {
+    // 1. Renderizar Reativação
+    const listaReat = document.getElementById('listaReativacao');
+    const filtrados = baseClientes.sort((a, b) => b.interacoes - a.interacoes).slice(0, 20);
+    listaReat.innerHTML = filtrados.map(c => {
+        const msg = encodeURIComponent(`Olá ${c.nome}! Notamos seu interesse no item ${c.cod}...`);
+        return `<tr><td>${c.nome}</td><td><span class="status-alert">${c.dias} dias</span></td><td>${c.interacoes}</td><td>${c.cod}</td><td><a href="https://wa.me/${c.tel}?text=${msg}" target="_blank" class="btn-wa">WhatsApp</a></td></tr>`;
     }).join('');
+
+    // 2. Renderizar Produtos
+    const listaProd = document.getElementById('listaProdutosBody');
+    listaProd.innerHTML = db[periodo].produtos.map(p => `<tr><td><strong>${p.cod}</strong></td><td>${p.nome}</td><td>${p.qtd} consultas</td></tr>`).join('');
 }
 
 function initChart() {
@@ -184,36 +191,34 @@ function initChart() {
         type: 'bar',
         data: {
             labels: db['7d'].labels,
-            datasets: [{
-                label: 'Interações',
-                data: db['7d'].data,
-                backgroundColor: '#e8375a',
-                borderRadius: 6
-            }]
+            datasets: [{ label: 'Interações', data: db['7d'].data, backgroundColor: '#e8375a', borderRadius: 6 }]
         },
         options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { display: false },
-                datalabels: { anchor: 'end', align: 'top', color: '#e8edf3', font: { weight: '600' } }
-            },
-            scales: { 
-                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a94b0' } },
-                x: { grid: { display: false }, ticks: { color: '#7a94b0' } }
-            },
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#e8edf3' } },
+            scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a94b0' } }, x: { grid: { display: false }, ticks: { color: '#7a94b0' } } },
             layout: { padding: { top: 30 } }
         }
     });
 }
 
-function filterData(period) {
+function filterData(periodo) {
+    // Atualiza Botões
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
     document.getElementById('data-label').innerText = `Filtro atual: ${event.target.innerText}`;
-    myChart.data.labels = db[period].labels;
-    myChart.data.datasets[0].data = db[period].data;
+
+    // ATUALIZA NÚMEROS (KPIs)
+    document.getElementById('kpi-leads').innerText = db[periodo].leads.toLocaleString();
+    document.getElementById('kpi-interacoes').innerText = db[periodo].interacoes.toLocaleString();
+
+    // ATUALIZA GRÁFICO
+    myChart.data.labels = db[periodo].labels;
+    myChart.data.datasets[0].data = db[periodo].data;
     myChart.update();
+
+    // ATUALIZA TABELAS
+    renderTabelas(periodo);
 }
 
 function showTab(tabId) {
@@ -225,7 +230,7 @@ function showTab(tabId) {
 
 window.onload = () => {
     initChart();
-    renderReativacao();
+    renderTabelas('7d');
 };
 </script>
 </body>
