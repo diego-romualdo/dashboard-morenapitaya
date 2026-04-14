@@ -50,7 +50,7 @@
         td { padding: 12px; border-bottom: 1px solid rgba(36,52,72,0.5); }
 
         .status-alert { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; background: rgba(232, 55, 90, 0.15); color: var(--rosa); border: 1px solid rgba(232,55,90,0.3); }
-        .btn-wa { background: #25d366; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; }
+        .btn-wa { background: #25d366; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; text-decoration: none; display: inline-block; }
         .badge-atendimento { background: var(--verde); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
 
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -101,7 +101,7 @@
             <div style="overflow-x: auto;">
                 <table>
                     <thead>
-                        <tr><th>Cliente</th><th>Inatividade</th><th>Interações Totais</th><th>Último Produto</th><th>Ação</th></tr>
+                        <tr><th>Cliente</th><th>Inatividade</th><th>Interações Totais</th><th>Código Mais Chamado</th><th>Ação</th></tr>
                     </thead>
                     <tbody id="listaReativacao"></tbody>
                 </table>
@@ -113,12 +113,9 @@
         <div class="chart-card">
             <h3>💬 Feed de Atendimento Recente</h3>
             <table>
-                <thead>
-                    <tr><th>Hora</th><th>Cliente</th><th>Mensagem</th><th>Canal</th><th>Status</th></tr>
-                </thead>
-                <tbody id="listaInteracoes">
+                <thead><tr><th>Hora</th><th>Cliente</th><th>Mensagem</th><th>Canal</th><th>Status</th></tr></thead>
+                <tbody>
                     <tr><td>22:45</td><td>Aline Ferreira</td><td>"Ainda tem o GG do 0918?"</td><td>WhatsApp</td><td><span class="badge-atendimento">Aguardando</span></td></tr>
-                    <tr><td>22:30</td><td>Julia Souza</td><td>"Qual o valor do frete?"</td><td>Instagram</td><td><span class="badge-atendimento" style="background:var(--muted)">Finalizado</span></td></tr>
                 </tbody>
             </table>
         </div>
@@ -128,12 +125,9 @@
         <div class="chart-card">
             <h3>👗 Desempenho por Referência</h3>
             <table>
-                <thead>
-                    <tr><th>Cód</th><th>Produto</th><th>Consultas</th><th>Conversão</th><th>Ação Sugerida</th></tr>
-                </thead>
-                <tbody id="listaProdutos">
-                    <tr><td><strong>0918</strong></td><td>Corselet Rendado</td><td>842</td><td>12%</td><td><span style="color:var(--verde)">Escalar Anúncio</span></td></tr>
-                    <tr><td><strong>0888</strong></td><td>Vestido Zíper</td><td>530</td><td>8%</td><td><span>Manter</span></td></tr>
+                <thead><tr><th>Cód</th><th>Produto</th><th>Consultas</th><th>Conversão</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>0918</strong></td><td>Corselet Rendado</td><td>842</td><td>12%</td></tr>
                 </tbody>
             </table>
         </div>
@@ -151,33 +145,37 @@ const db = {
     'max': { interacoes: 450000, labels: ['Jan', 'Fev', 'Mar', 'Abr'], data: [12000, 15000, 18000, 22000] }
 };
 
-// Simulação de base de dados para Reativação
+// Dados simulados com números de telefone para teste
 const baseClientes = Array.from({length: 50}, (_, i) => ({
     nome: `Cliente Plus ${i+1}`,
-    diasInativo: Math.floor(Math.random() * (20 - 2 + 1) + 2), // 2 a 20 dias
+    telefone: "5531999999999", // Exemplo de formato internacional
+    diasInativo: Math.floor(Math.random() * (15 - 5 + 1) + 5),
     totalInteracoes: Math.floor(Math.random() * 500),
     ultimoCodigo: ["0918", "0888", "0773", "0411"][Math.floor(Math.random() * 4)]
 }));
 
 function renderReativacao() {
-    // Filtro: > 7 dias e < 14 dias
-    // Ordenação: Maior volume de interação
-    // Limite: 20 primeiros
     const filtrados = baseClientes
         .filter(c => c.diasInativo > 7 && c.diasInativo < 14)
         .sort((a, b) => b.totalInteracoes - a.totalInteracoes)
         .slice(0, 20);
 
     const lista = document.getElementById('listaReativacao');
-    lista.innerHTML = filtrados.map(c => `
-        <tr>
-            <td><strong>${c.nome}</strong></td>
-            <td><span class="status-alert">${c.diasInativo} dias</span></td>
-            <td>${c.totalInteracoes}</td>
-            <td>Cód. ${c.ultimoCodigo}</td>
-            <td><button class="btn-wa">Chamar</button></td>
-        </tr>
-    `).join('');
+    lista.innerHTML = filtrados.map(c => {
+        // Criando a mensagem personalizada para o WhatsApp
+        const mensagem = encodeURIComponent(`Olá ${c.nome}! Tudo bem? Notei que você gostou do nosso modelo ${c.ultimoCodigo} e não queria que você perdesse as novidades. Podemos te ajudar com algo?`);
+        const waLink = `https://wa.me/${c.telefone}?text=${mensagem}`;
+
+        return `
+            <tr>
+                <td><strong>${c.nome}</strong></td>
+                <td><span class="status-alert">${c.diasInativo} dias</span></td>
+                <td>${c.totalInteracoes}</td>
+                <td><strong>${c.ultimoCodigo}</strong></td>
+                <td><a href="${waLink}" target="_blank" class="btn-wa">WhatsApp</a></td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function initChart() {
@@ -190,8 +188,7 @@ function initChart() {
                 label: 'Interações',
                 data: db['7d'].data,
                 backgroundColor: '#e8375a',
-                borderRadius: 6,
-                barPercentage: 0.6
+                borderRadius: 6
             }]
         },
         options: { 
@@ -214,7 +211,6 @@ function filterData(period) {
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
     document.getElementById('data-label').innerText = `Filtro atual: ${event.target.innerText}`;
-    
     myChart.data.labels = db[period].labels;
     myChart.data.datasets[0].data = db[period].data;
     myChart.update();
