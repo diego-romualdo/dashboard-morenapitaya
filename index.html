@@ -13,51 +13,45 @@
             --navy2: #162030; --navy3: #1e2d40; --card: #192535; --border: #243448;
             --text: #e8edf3; --muted: #7a94b0; --gold: #f5c842;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: var(--navy); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
-
         .sidebar { position: fixed; top: 0; left: 0; width: 220px; height: 100vh; background: var(--navy2); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 32px 0; z-index: 100; }
         .logo { padding: 0 24px 32px; border-bottom: 1px solid var(--border); }
         .logo-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; color: var(--rosa); }
         .logo-sub { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
-
         .nav { padding: 24px 0; flex: 1; }
         .nav-item { display: flex; align-items: center; gap: 10px; padding: 12px 24px; font-size: 13px; color: var(--muted); cursor: pointer; transition: 0.2s; border-left: 3px solid transparent; }
         .nav-item:hover, .nav-item.active { color: var(--text); background: rgba(232,55,90,0.08); border-left-color: var(--rosa); }
-
         .main { margin-left: 220px; padding: 32px; min-height: 100vh; transition: all 0.3s; }
         .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
         .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
-        
+       
         .filter-group { display: flex; gap: 8px; background: var(--navy2); padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
         .filter-btn { background: transparent; border: none; color: var(--muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.2s; }
         .filter-btn.active { background: var(--rosa); color: white; }
-
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
         .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
         .kpi-value { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--text); }
         .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-
         .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
         .chart-wrap { position: relative; height: 380px; width: 100%; }
-        
+       
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeUp 0.4s ease; }
-
         table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
-        th { text-align: left; padding: 12px; color: var(--muted); text-transform: uppercase; font-size: 10px; border-bottom: 1px solid var(--border); }
-        td { padding: 12px; border-bottom: 1px solid rgba(36,52,72,0.5); }
-
+        th { text-align: left; padding: 12px 8px; color: var(--muted); text-transform: uppercase; font-size: 10px; border-bottom: 1px solid var(--border); }
+        td { padding: 12px 8px; border-bottom: 1px solid rgba(36,52,72,0.5); vertical-align: middle; }
         .status-alert { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; background: rgba(232, 55, 90, 0.15); color: var(--rosa); border: 1px solid rgba(232,55,90,0.3); }
         .btn-wa { background: #25d366; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; text-decoration: none; display: inline-block; }
-
+        .loading { opacity: 0.6; pointer-events: none; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; padding: 16px; } }
+        @media (max-width: 768px) { 
+            .sidebar { display: none; } 
+            .main { margin-left: 0; padding: 16px; } 
+        }
     </style>
 </head>
 <body>
-
 <aside class="sidebar">
     <div class="logo">
         <div class="logo-title">Morena Pitaya</div>
@@ -78,10 +72,10 @@
             <p id="data-label" style="font-size: 13px; color: var(--muted);">Filtro atual: 7 Dias</p>
         </div>
         <div class="filter-group">
-            <button class="filter-btn" onclick="filterData('hoje')">Hoje</button>
-            <button class="filter-btn active" onclick="filterData('7d')">7 Dias</button>
-            <button class="filter-btn" onclick="filterData('30d')">30 Dias</button>
-            <button class="filter-btn" onclick="filterData('max')">Máximo</button>
+            <button class="filter-btn" onclick="filterData('hoje', this)">Hoje</button>
+            <button class="filter-btn active" onclick="filterData('7d', this)">7 Dias</button>
+            <button class="filter-btn" onclick="filterData('30d', this)">30 Dias</button>
+            <button class="filter-btn" onclick="filterData('max', this)">Máximo</button>
         </div>
     </header>
 
@@ -96,7 +90,7 @@
     <section id="reativacao" class="tab-content">
         <div class="chart-card">
             <h3>🚨 Prioridade de Reativação (7 a 14 dias sem contato)</h3>
-            <p style="font-size: 12px; color: var(--muted); margin-bottom: 15px;">Listando os contatos com maior volume de interação no período selecionado.</p>
+            <p style="font-size: 12px; color: var(--muted); margin-bottom: 15px;">Clientes com maior volume de interação no período selecionado.</p>
             <div style="overflow-x: auto;">
                 <table>
                     <thead><tr><th>Cliente</th><th>Inatividade</th><th>Interações</th><th>Código</th><th>Ação</th></tr></thead>
@@ -109,9 +103,9 @@
     <section id="interacoes" class="tab-content">
         <div class="chart-card">
             <h3>💬 Feed de Atendimento do Período</h3>
-            <div id="feedInteracoes">
+            <div style="overflow-x: auto;">
                 <table>
-                    <thead><tr><th>Hora/Data</th><th>Cliente</th><th>Canal</th></tr></thead>
+                    <thead><tr><th>Hora/Data</th><th>Cliente</th><th>Canal</th><th>Resumo</th></tr></thead>
                     <tbody id="listaFeed"></tbody>
                 </table>
             </div>
@@ -121,117 +115,116 @@
     <section id="produtos" class="tab-content">
         <div class="chart-card">
             <h3>👗 Top Produtos no Período</h3>
-            <tbody id="listaProdutos">
+            <div style="overflow-x: auto;">
                 <table>
-                    <thead><tr><th>Cód</th><th>Referência</th><th>Interesse</th></tr></thead>
+                    <thead><tr><th>Cód</th><th>Referência</th><th>Interesse (consultas)</th></tr></thead>
                     <tbody id="listaProdutosBody"></tbody>
                 </table>
-            </tbody>
+            </div>
         </div>
     </section>
 </main>
 
 <script>
 let myChart;
-Chart.register(ChartDataLabels);
 
-// BANCO DE DADOS DINÂMICO - Agora tudo muda ao trocar a aba/filtro
+// ==================== DADOS MOCKADOS (substituir por fetch depois) ====================
 const db = {
-    'hoje': { 
-        leads: 42, interacoes: 1240, 
-        labels: ['00h', '06h', '12h', '18h', 'Agora'], 
-        data: [15, 8, 310, 520, 108],
-        produtos: [{cod: '0918', nome: 'Corselet', qtd: 45}, {cod: '0888', nome: 'Vestido', qtd: 32}]
-    },
-    '7d': { 
-        leads: 4800, interacoes: 35383, 
-        labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'], 
-        data: [450, 580, 920, 660, 310, 400, 90],
-        produtos: [{cod: '0918', nome: 'Corselet', qtd: 842}, {cod: '0773', nome: 'Blazer', qtd: 410}]
-    },
-    '30d': { 
-        leads: 5120, interacoes: 120400, 
-        labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'], 
-        data: [2500, 3100, 2800, 3400],
-        produtos: [{cod: '0411', nome: 'Calça', qtd: 1200}, {cod: '0918', nome: 'Corselet', qtd: 980}]
-    },
-    'max': { 
-        leads: 6400, interacoes: 450000, 
-        labels: ['Jan', 'Fev', 'Mar', 'Abr'], 
-        data: [12000, 15000, 18000, 22000],
-        produtos: [{cod: '0918', nome: 'Corselet', qtd: 5400}, {cod: '0888', nome: 'Vestido', qtd: 4200}]
-    }
+    'hoje': { leads: 42, interacoes: 1240, labels: ['00h','06h','12h','18h','Agora'], data: [15,8,310,520,108],
+        produtos: [{cod:'0918', nome:'Corselet', qtd:45}] },
+    '7d': { leads: 4800, interacoes: 35383, labels: ['Seg','Ter','Qua','Qui','Sex','Sab','Dom'], data: [450,580,920,660,310,400,90],
+        produtos: [{cod:'0918', nome:'Corselet', qtd:842}, {cod:'0773', nome:'Blazer', qtd:410}] },
+    '30d': { leads: 5120, interacoes: 120400, labels: ['Sem 1','Sem 2','Sem 3','Sem 4'], data: [2500,3100,2800,3400],
+        produtos: [{cod:'0411', nome:'Calça', qtd:1200}, {cod:'0918', nome:'Corselet', qtd:980}] },
+    'max': { leads: 6400, interacoes: 450000, labels: ['Jan','Fev','Mar','Abr'], data: [12000,15000,18000,22000],
+        produtos: [{cod:'0918', nome:'Corselet', qtd:5400}, {cod:'0888', nome:'Vestido', qtd:4200}] }
 };
 
-const baseClientes = Array.from({length: 40}, (_, i) => ({
+// Clientes simulados (substituir por dados do Supabase)
+let baseClientes = Array.from({length: 85}, (_, i) => ({
     nome: `Cliente Plus ${i+1}`,
     tel: "5531999999999",
-    dias: Math.floor(Math.random() * (13 - 8 + 1) + 8),
-    interacoes: Math.floor(Math.random() * 500),
+    dias: Math.floor(Math.random() * 7) + 7,        // 7 a 13 dias
+    interacoes: Math.floor(Math.random() * 650) + 50,
     cod: ["0918", "0888", "0773", "0411"][Math.floor(Math.random() * 4)]
 }));
 
-function renderTabelas(periodo) {
-    // 1. Renderizar Reativação
-    const listaReat = document.getElementById('listaReativacao');
-    const filtrados = baseClientes.sort((a, b) => b.interacoes - a.interacoes).slice(0, 20);
-    listaReat.innerHTML = filtrados.map(c => {
-        const msg = encodeURIComponent(`Olá ${c.nome}! Notamos seu interesse no item ${c.cod}...`);
-        return `<tr><td>${c.nome}</td><td><span class="status-alert">${c.dias} dias</span></td><td>${c.interacoes}</td><td>${c.cod}</td><td><a href="https://wa.me/${c.tel}?text=${msg}" target="_blank" class="btn-wa">WhatsApp</a></td></tr>`;
-    }).join('');
+// ==================== FUNÇÕES DE RENDERIZAÇÃO SEGURA ====================
+function createReativacaoRow(cliente) {
+    const tr = document.createElement('tr');
+    
+    const msg = encodeURIComponent(`Olá ${cliente.nome}! Notamos seu interesse no item ${cliente.cod}...`);
+    const waLink = `https://wa.me/${cliente.tel}?text=${msg}`;
 
-    // 2. Renderizar Produtos
-    const listaProd = document.getElementById('listaProdutosBody');
-    listaProd.innerHTML = db[periodo].produtos.map(p => `<tr><td><strong>${p.cod}</strong></td><td>${p.nome}</td><td>${p.qtd} consultas</td></tr>`).join('');
+    tr.innerHTML = `
+        <td>${cliente.nome}</td>
+        <td><span class="status-alert">${cliente.dias} dias</span></td>
+        <td><strong>${cliente.interacoes}</strong></td>
+        <td>${cliente.cod}</td>
+        <td><a href="${waLink}" target="_blank" rel="noopener noreferrer" class="btn-wa">WhatsApp</a></td>
+    `;
+    return tr;
 }
 
+function renderReativacao() {
+    const tbody = document.getElementById('listaReativacao');
+    tbody.innerHTML = ''; // limpa
+
+    // Ordena por interações (sem mutar o array original)
+    const ordenados = [...baseClientes]
+        .sort((a, b) => b.interacoes - a.interacoes)
+        .slice(0, 50); // aumentado para 50
+
+    ordenados.forEach(cliente => {
+        tbody.appendChild(createReativacaoRow(cliente));
+    });
+}
+
+function renderProdutos(periodo) {
+    const tbody = document.getElementById('listaProdutosBody');
+    tbody.innerHTML = db[periodo].produtos.map(p => `
+        <tr>
+            <td><strong>${p.cod}</strong></td>
+            <td>${p.nome}</td>
+            <td>${p.qtd.toLocaleString('pt-BR')} consultas</td>
+        </tr>
+    `).join('');
+}
+
+// ==================== GRÁFICO ====================
 function initChart() {
     const ctx = document.getElementById('mainChart').getContext('2d');
     myChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: db['7d'].labels,
-            datasets: [{ label: 'Interações', data: db['7d'].data, backgroundColor: '#e8375a', borderRadius: 6 }]
+            datasets: [{
+                label: 'Interações',
+                data: db['7d'].data,
+                backgroundColor: '#e8375a',
+                borderRadius: 6
+            }]
         },
-        options: { 
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#e8edf3' } },
-            scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a94b0' } }, x: { grid: { display: false }, ticks: { color: '#7a94b0' } } },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                datalabels: { anchor: 'end', align: 'top', color: '#e8edf3', font: { weight: '600' } }
+            },
+            scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a94b0' } },
+                x: { grid: { display: false }, ticks: { color: '#7a94b0' } }
+            },
             layout: { padding: { top: 30 } }
         }
     });
 }
 
-function filterData(periodo) {
-    // Atualiza Botões
-    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    document.getElementById('data-label').innerText = `Filtro atual: ${event.target.innerText}`;
+// ==================== FILTRO ====================
+function filterData(periodo, btnElement) {
+    // Atualiza botões
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    if (btnElement) btnElement.classList.add('active');
 
-    // ATUALIZA NÚMEROS (KPIs)
-    document.getElementById('kpi-leads').innerText = db[periodo].leads.toLocaleString();
-    document.getElementById('kpi-interacoes').innerText = db[periodo].interacoes.toLocaleString();
-
-    // ATUALIZA GRÁFICO
-    myChart.data.labels = db[periodo].labels;
-    myChart.data.datasets[0].data = db[periodo].data;
-    myChart.update();
-
-    // ATUALIZA TABELAS
-    renderTabelas(periodo);
-}
-
-function showTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-}
-
-window.onload = () => {
-    initChart();
-    renderTabelas('7d');
-};
-</script>
-</body>
-</html>
+    document.getElementById('data-label').innerText = `Filtro
