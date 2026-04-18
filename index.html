@@ -288,7 +288,11 @@ function getStartDate(period) {
 }
 
 // ═══════════════════════════════════════════
-// 🔍 BUSCA DE DADOS — CORRIGIDA
+// 🔍 BUSCA DE DADOS — SCHEMA REAL
+// crm_contacts    → criado_em, atualizado_em, ultima_interacao,
+//                   estagio_funil, nome, canal_principal, tags, lead_score
+// crm_interactions→ criado_em, horario_msg, canal, tipo,
+//                   contact_id, mensagem, respondida, instancia
 // ═══════════════════════════════════════════
 async function fetchData(period) {
     console.log(`🔍 Buscando dados · período: ${period}`);
@@ -296,19 +300,18 @@ async function fetchData(period) {
         const startDateISO = getStartDate(period);
 
         // 1. TOTAL DE CONTATOS
-        // ✅ FIX: removido .eq('status','lead') — coluna não existe.
-        //         Buscamos o total geral de crm_contacts.
         const { count: totalContatos, error: errContatos } = await sb
             .from('crm_contacts')
             .select('id', { count: 'exact', head: true });
         if (errContatos) throw errContatos;
 
         // 2. INTERAÇÕES DO PERÍODO
+        // ✅ FIX: created_at → criado_em | type → tipo
         const { data: interactions, error: errInt } = await sb
             .from('crm_interactions')
-            .select('id, canal, created_at, contact_id, type')
-            .gte('created_at', startDateISO)
-            .order('created_at', { ascending: false })
+            .select('id, canal, criado_em, contact_id, tipo, mensagem, respondida')
+            .gte('criado_em', startDateISO)
+            .order('criado_em', { ascending: false })
             .limit(2000);
         if (errInt) throw errInt;
 
@@ -316,29 +319,29 @@ async function fetchData(period) {
         const instagram = interactions?.filter(i => i.canal === 'instagram').length ?? 0;
         const whatsapp  = interactions?.filter(i => i.canal === 'whatsapp').length  ?? 0;
 
-        // Agrupamento diário → gráfico
+        // Agrupamento diário → gráfico (usa criado_em)
         const dailyCount = {};
         (interactions ?? []).forEach(d => {
-            const dt = new Date(d.created_at);
-            const label = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            const label = new Date(d.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
             dailyCount[label] = (dailyCount[label] || 0) + 1;
         });
 
         // 3. REATIVAÇÃO
-        // ✅ FIX: removido .eq('status','lead') — filtro por período de updated_at apenas.
-        const sevenDaysAgo   = new Date(Date.now() -  7*86400000).toISOString();
+        // ✅ FIX: updated_at → atualizado_em | telefone → remote_jid (não existe telefone)
+        //         canal → canal_principal | removido status filter
+        const sevenDaysAgo    = new Date(Date.now() -  7*86400000).toISOString();
         const fourteenDaysAgo = new Date(Date.now() - 14*86400000).toISOString();
 
         const { data: reativacao, error: errReat } = await sb
             .from('crm_contacts')
-            .select('id, nome, telefone, canal, updated_at')
-            .lte('updated_at', sevenDaysAgo)
-            .gte('updated_at', fourteenDaysAgo)
-            .order('updated_at', { ascending: true })
+            .select('id, nome, remote_jid, canal_principal, atualizado_em, estagio_funil, lead_score')
+            .lte('atualizado_em', sevenDaysAgo)
+            .gte('atualizado_em', fourteenDaysAgo)
+            .order('atualizado_em', { ascending: true })
             .limit(50);
         if (errReat) throw errReat;
 
-        // 4. PRODUTOS (se a tabela existir)
+        // 4. PRODUTOS (tabela pode ainda não existir)
         let produtos = [];
         try {
             const { data: prods, error: errProd } = await sb
@@ -347,13 +350,12 @@ async function fetchData(period) {
                 .order('mencoes', { ascending: false })
                 .limit(20);
             if (!errProd) produtos = prods ?? [];
-        } catch (_) { /* tabela pode não existir ainda */ }
+        } catch (_) { /* tabela não existe ainda */ }
 
-        // Limpa erro se tudo OK
         document.getElementById('error-container').innerHTML = '';
 
         return {
-            totalContatos: totalContatos ?? 0,
+            totalContatos:    totalContatos ?? 0,
             totalInteracoes,
             instagram,
             whatsapp,
@@ -367,7 +369,7 @@ async function fetchData(period) {
     } catch (err) {
         console.error('❌ ERRO SUPABASE:', err.message);
         console.error('📋 DETAILS:', err.details ?? 'N/A');
-        console.error('💡 HINT:', err.hint ?? 'Verifique RLS ou nome das colunas');
+        console.error('💡 HINT:', err.hint ?? 'N/A');
 
         document.getElementById('error-container').innerHTML = `
             <div class="error-box">
@@ -393,12 +395,12 @@ function getDemoData() {
         chartLabels: ['11/04','12/04','13/04','14/04','15/04','16/04','17/04'],
         chartData:   [340, 510, 380, 620, 490, 310, 280],
         reativacao: [
-            { id: 'C-1024', nome: 'Exemplo Cliente 1', telefone: '5531999887766', canal: 'instagram', updated_at: new Date(now - 9*86400000).toISOString() },
-            { id: 'C-0892', nome: 'Exemplo Cliente 2', telefone: '5531988776655', canal: 'whatsapp',  updated_at: new Date(now - 11*86400000).toISOString() }
+            { id: 'C-1024', nome: 'Exemplo Cliente 1', remote_jid: '5531999887766@s.whatsapp.net', canal_principal: 'instagram', atualizado_em: new Date(now - 9*86400000).toISOString() },
+            { id: 'C-0892', nome: 'Exemplo Cliente 2', remote_jid: '5531988776655@s.whatsapp.net', canal_principal: 'whatsapp',  atualizado_em: new Date(now - 11*86400000).toISOString() }
         ],
         interacoes: [
-            { id: 1, contact_id: 'C-1024', canal: 'instagram', type: 'recebida', created_at: new Date(now - 300000).toISOString() },
-            { id: 2, contact_id: 'C-0892', canal: 'whatsapp',  type: 'enviada',  created_at: new Date(now - 600000).toISOString() }
+            { id: 1, contact_id: 'C-1024', canal: 'instagram', tipo: 'recebida', criado_em: new Date(now - 300000).toISOString() },
+            { id: 2, contact_id: 'C-0892', canal: 'whatsapp',  tipo: 'enviada',  criado_em: new Date(now - 600000).toISOString() }
         ],
         produtos: []
     };
@@ -454,18 +456,18 @@ function renderReativacao(list) {
         return;
     }
     tbody.innerHTML = list.map(c => {
-        const dias = Math.floor((Date.now() - new Date(c.updated_at).getTime()) / 86400000);
-        const tel  = (c.telefone || '').replace(/\D/g, '');
+        const dias = Math.floor((Date.now() - new Date(c.atualizado_em).getTime()) / 86400000);
+        const jid = (c.remote_jid || '').replace(/@.*/,'').replace(/D/g,'');
         const msg  = encodeURIComponent('Olá! 👋 Sumiu, maravilhosa! Posso te ajudar com algo?');
-        const nome = c.nome || c.id || 'Sem nome';
+        const nome = c.nome || c.remote_jid || ('#'+c.id);
         const badge = dias >= 12 ? 'status-alert' : 'status-warning';
         return `<tr>
             <td>${nome}</td>
-            <td style="color:var(--muted)">${c.telefone || '-'}</td>
-            <td>${new Date(c.updated_at).toLocaleString('pt-BR')}</td>
+            <td style="color:var(--muted)">${c.remote_jid || '-'}</td>
+            <td>${new Date(c.atualizado_em).toLocaleString('pt-BR')}</td>
             <td><span class="status-badge ${badge}">${dias} dias</span></td>
-            <td>${c.canal || '-'}</td>
-            <td>${tel ? `<a href="https://wa.me/${tel}?text=${msg}" target="_blank" rel="noopener" class="btn-wa">💬 WA</a>` : '-'}</td>
+            <td>${c.canal_principal || '-'}</td>
+            <td>${jid ? `<a href="https://wa.me/${jid}?text=${msg}" target="_blank" rel="noopener" class="btn-wa">💬 WA</a>` : '-'}</td>
         </tr>`;
     }).join('');
 }
@@ -478,13 +480,13 @@ function renderInteracoes(list) {
     }
     const canalIcon = { instagram: '📱', whatsapp: '💚', email: '📧' };
     tbody.innerHTML = list.slice(0, 50).map(i => {
-        const badge = i.type === 'recebida' ? 'status-success' : i.type === 'enviada' ? 'status-warning' : 'status-neutral';
+        const badge = i.tipo === 'recebida' ? 'status-success' : i.tipo === 'enviada' ? 'status-warning' : 'status-neutral';
         const icon  = canalIcon[i.canal] ?? '🔔';
         return `<tr>
-            <td style="white-space:nowrap;color:var(--muted)">${new Date(i.created_at).toLocaleString('pt-BR')}</td>
+            <td style="white-space:nowrap;color:var(--muted)">${new Date(i.criado_em).toLocaleString('pt-BR')}</td>
             <td>Contato #${i.contact_id ?? '?'}</td>
             <td>${icon} ${i.canal ?? '-'}</td>
-            <td><span class="status-badge ${badge}">${i.type ?? '-'}</span></td>
+            <td><span class="status-badge ${badge}">${i.tipo ?? '-'}</span></td>
         </tr>`;
     }).join('');
 }
