@@ -6,6 +6,7 @@
     <title>CRM · Morena Pitaya</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
         :root {
@@ -145,13 +146,14 @@
 
 <script>
 // 🔑 CONFIGURAÇÃO SUPABASE - SUBSTITUA PELAS SUAS CREDENCIAIS
-const SUPABASE_URL = 'https://supabase.morenapitaya.com/';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzc2MDQ5MjAwLCJleHAiOjE5MzM4MTU2MDB9.PVvpnzkL7mdGkMKO1XCR2c8awZuZJ6NyeT_3qB06EMI';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = 'https://SEU-PROJETO.supabase.co';
+const SUPABASE_ANON_KEY = 'SUA-CHAVE-ANON';
+
+// ✅ FIX: Renomeado para 'sb' para evitar conflito com a variável global 'supabase'
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let state = { currentPeriod: '7d', chart: null };
 
-// ===== QUERIES SQL OTIMIZADAS =====
 async function fetchData(period) {
     const now = new Date();
     let startDate;
@@ -167,34 +169,41 @@ async function fetchData(period) {
     
     try {
         // 1. Total de leads (contacts com status='lead')
-        const { count: totalLeads } = await supabase
+        const { count: totalLeads, error: errorLeads } = await sb
             .from('crm_contacts')
             .select('*', { count: 'exact', head: true })
             .eq('status', 'lead');
         
+        if (errorLeads) throw errorLeads;
+
         // 2. Total de interações no período
-        const { count: totalInteracoes } = await supabase
+        const { count: totalInteracoes, error: errorInt } = await sb
             .from('crm_interactions')
             .select('*', { count: 'exact', head: true })
             .gte('created_at', startDateISO);
-        
-        // 3. Interações por canal
-        const { data: interactionsByChannel } = await supabase
+
+        if (errorInt) throw errorInt;
+
+        // 3. Interações por canal (usando 'canal' para combinar com seu CSV)
+        const { data: interactionsByChannel, error: errorChannel } = await sb
             .from('crm_interactions')
-            .select('channel')
+            .select('canal')
             .gte('created_at', startDateISO);
         
-        const instagram = interactionsByChannel?.filter(i => i.channel === 'instagram').length || 0;
-        const whatsapp = interactionsByChannel?.filter(i => i.channel === 'whatsapp').length || 0;
+        if (errorChannel) throw errorChannel;
+
+        const instagram = interactionsByChannel?.filter(i => i.canal === 'instagram').length || 0;
+        const whatsapp = interactionsByChannel?.filter(i => i.canal === 'whatsapp').length || 0;
         
         // 4. Evolução por dia (para gráfico)
-        const { data: dailyData } = await supabase
+        const { data: dailyData, error: errorDaily } = await sb
             .from('crm_interactions')
             .select('created_at')
             .gte('created_at', startDateISO)
             .order('created_at', { ascending: true });
-        
-        // Agrupa por dia
+            
+        if (errorDaily) throw errorDaily;
+
         const dailyCount = {};
         dailyData?.forEach(d => {
             const date = new Date(d.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
@@ -202,36 +211,41 @@ async function fetchData(period) {
         });
         
         // 5. Clientes para reativação (7-14 dias sem atualizar)
-        const { data: reativacao } = await supabase
+        const { data: reativacao, error: errorReat } = await sb
             .from('crm_contacts')
-            .select('id, nome, telefone, canal, updated_at, status')
+            .select('id, telefone, canal, updated_at, status')
             .eq('status', 'lead')
             .lte('updated_at', new Date(Date.now() - 7*24*60*60*1000).toISOString())
             .gte('updated_at', new Date(Date.now() - 14*24*60*60*1000).toISOString())
             .order('updated_at', { ascending: true })
             .limit(20);
-        
+
+        if (errorReat) throw errorReat;
+
         // 6. Últimas interações
-        const { data: ultimasInteracoes } = await supabase
+        const { data: ultimasInteracoes, error: errorFeed } = await sb
             .from('crm_interactions')
             .select(`
                 id,
                 message,
                 type,
-                channel,
+                canal,
                 created_at,
                 contact_id
             `)
             .gte('created_at', startDateISO)
             .order('created_at', { ascending: false })
             .limit(50);
+
+        if (errorFeed) throw errorFeed;
         
-        // 7. Produtos mais mencionados (extrai códigos das mensagens)
-        const { data: allProducts } = await supabase
+        // 7. Produtos (para contagem de menções)
+        const { data: allProducts, error: errorProd } = await sb
             .from('crm_products')
             .select('codigo, name, category, price');
-        
-        // Conta menções de produtos nas interações
+
+        if (errorProd) throw errorProd;
+
         const productMentions = {};
         interactionsByChannel?.forEach(interaction => {
             const msg = interaction.message || '';
@@ -269,12 +283,11 @@ async function fetchData(period) {
         };
         
     } catch (error) {
-        console.error('Erro ao buscar dados:', error);
+        console.error('Erro ao buscar dados do Supabase:', error);
         return null;
     }
 }
 
-// ===== ATUALIZAÇÃO DA UI =====
 function updateKPIs(data) {
     document.getElementById('kpi-leads').innerText = data.totalLeads.toLocaleString('pt-BR');
     document.getElementById('kpi-interacoes').innerText = data.totalInteracoes.toLocaleString('pt-BR');
@@ -322,10 +335,10 @@ function renderReativacao(data) {
     
     tbody.innerHTML = data.map(c => {
         const dias = Math.floor((Date.now() - new Date(c.updated_at).getTime()) / (1000*60*60*24));
-        const msg = encodeURIComponent(`Olá ${c.nome || 'Cliente'}! 👋 Tudo bem?`);
+        const msg = encodeURIComponent(`Olá! 👋 Tudo bem?`);
         return `
             <tr>
-                <td>${c.nome || 'Sem nome'}</td>
+                <td>${c.id || 'Sem nome'}</td>
                 <td>${c.telefone || '-'}</td>
                 <td>${new Date(c.updated_at).toLocaleString('pt-BR')}</td>
                 <td><span class="status-badge status-alert">${dias} dias</span></td>
@@ -347,7 +360,7 @@ function renderInteracoes(data) {
         <tr>
             <td>${new Date(i.created_at).toLocaleString('pt-BR')}</td>
             <td>Contato #${i.contact_id || '?'}</td>
-            <td>${i.channel === 'instagram' ? '📱' : '💚'} ${i.channel}</td>
+            <td>${i.canal === 'instagram' ? '📱' : '💚'} ${i.canal}</td>
             <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.message || '-'}</td>
             <td><span class="status-badge ${i.type === 'recebida' ? 'status-success' : 'status-warning'}">${i.type}</span></td>
         </tr>
@@ -372,14 +385,13 @@ function renderProdutos(data) {
     `).join('');
 }
 
-// ===== CONTROLES =====
 async function filterData(period, btn) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
     state.currentPeriod = period;
     
-    // Mostra loading
     document.querySelectorAll('.kpi-value').forEach(el => el.innerText = '...');
+    document.querySelectorAll('tbody').forEach(el => el.innerHTML = '<tr><td colspan="6" class="loading"><div class="spinner"></div>Atualizando...</td></tr>');
     
     const data = await fetchData(period);
     if (data) {
@@ -404,11 +416,8 @@ function showTab(tabId) {
     });
 }
 
-// ===== INICIALIZAÇÃO =====
 window.onload = () => {
     filterData('7d', document.querySelector('.filter-btn.active'));
-    
-    // Auto-refresh a cada 60 segundos
     setInterval(() => {
         filterData(state.currentPeriod, document.querySelector('.filter-btn.active'));
     }, 60000);
