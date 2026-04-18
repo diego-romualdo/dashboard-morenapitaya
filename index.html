@@ -6,1097 +6,413 @@
     <title>CRM · Morena Pitaya</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
         :root {
             --rosa: #e8375a; --rosa2: #ff6b8a; --verde: #7ab648; --navy: #0f1923;
             --navy2: #162030; --navy3: #1e2d40; --card: #192535; --border: #243448;
-            --text: #e8edf3; --muted: #7a94b0; --gold: #f5c842; --success: #2ecc71;
-            --warning: #f39c12; --danger: #e74c3c;
+            --text: #e8edf3; --muted: #7a94b0; --gold: #f5c842;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            background: var(--navy); 
-            color: var(--text); 
-            font-family: 'DM Sans', sans-serif; 
-            min-height: 100vh; 
-            overflow-x: hidden;
-            line-height: 1.5;
-        }
-        
-        /* ===== SIDEBAR ===== */
-        .sidebar { 
-            position: fixed; top: 0; left: 0; 
-            width: 240px; height: 100vh; 
-            background: var(--navy2); 
-            border-right: 1px solid var(--border); 
-            display: flex; flex-direction: column; 
-            padding: 24px 0; z-index: 100;
-            transition: transform 0.3s ease;
-        }
-        .sidebar.collapsed { transform: translateX(-100%); }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--navy); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+        .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background: var(--navy2); border-right: 1px solid var(--border); padding: 24px 0; z-index: 100; }
         .logo { padding: 0 24px 24px; border-bottom: 1px solid var(--border); }
         .logo-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; color: var(--rosa); }
         .logo-sub { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-top: 4px; }
-        
-        .nav { padding: 16px 0; flex: 1; overflow-y: auto; }
-        .nav-item { 
-            display: flex; align-items: center; gap: 12px; 
-            padding: 14px 24px; font-size: 14px; 
-            color: var(--muted); cursor: pointer; 
-            transition: 0.2s; border-left: 3px solid transparent;
-            white-space: nowrap;
-        }
-        .nav-item:hover, .nav-item.active { 
-            color: var(--text); 
-            background: rgba(232,55,90,0.12); 
-            border-left-color: var(--rosa); 
-        }
-        .nav-item .icon { font-size: 18px; }
-        
-        .sidebar-footer { 
-            padding: 16px 24px; 
-            border-top: 1px solid var(--border);
-            font-size: 11px; color: var(--muted);
-        }
-        
-        /* ===== MAIN CONTENT ===== */
-        .main { 
-            margin-left: 240px; 
-            padding: 24px; 
-            min-height: 100vh; 
-            transition: margin-left 0.3s ease;
-        }
-        .main.full-width { margin-left: 0; }
-        
-        /* ===== HEADER ===== */
-        .page-header { 
-            display: flex; align-items: center; justify-content: space-between; 
-            margin-bottom: 24px; flex-wrap: wrap; gap: 16px;
-            padding-bottom: 16px; border-bottom: 1px solid var(--border);
-        }
-        .header-left { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-        .menu-toggle { 
-            display: none; background: var(--card); border: 1px solid var(--border);
-            border-radius: 8px; padding: 10px; cursor: pointer; color: var(--text);
-            font-size: 20px;
-        }
+        .nav { padding: 16px 0; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 24px; font-size: 14px; color: var(--muted); cursor: pointer; transition: 0.2s; border-left: 3px solid transparent; }
+        .nav-item:hover, .nav-item.active { color: var(--text); background: rgba(232,55,90,0.12); border-left-color: var(--rosa); }
+        .main { margin-left: 240px; padding: 24px; min-height: 100vh; }
+        .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
         .page-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; }
-        
-        .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        
-        /* Status indicators */
-        .status-indicator { 
-            display: flex; align-items: center; gap: 6px; 
-            font-size: 11px; color: var(--muted);
-            background: var(--navy2); padding: 6px 12px; border-radius: 20px;
-        }
-        .status-dot { 
-            width: 8px; height: 8px; border-radius: 50%; 
-            background: var(--success); animation: pulse 2s infinite;
-        }
-        .status-dot.offline { background: var(--danger); animation: none; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
-        /* Filter buttons */
         .filter-group { display: flex; gap: 4px; background: var(--navy2); padding: 4px; border-radius: 10px; border: 1px solid var(--border); }
-        .filter-btn { 
-            background: transparent; border: none; color: var(--muted); 
-            padding: 8px 14px; border-radius: 8px; cursor: pointer; 
-            font-size: 12px; font-weight: 500; transition: 0.2s;
-        }
-        .filter-btn:hover { color: var(--text); }
+        .filter-btn { background: transparent; border: none; color: var(--muted); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; transition: 0.2s; }
         .filter-btn.active { background: var(--rosa); color: white; }
-        
-        /* ===== KPI CARDS ===== */
-        .kpi-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
-            gap: 16px; margin-bottom: 24px;
-        }
-        .kpi-card { 
-            background: var(--card); border: 1px solid var(--border); 
-            border-radius: 14px; padding: 20px; 
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative; overflow: hidden;
-        }
-        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
-        .kpi-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-            background: linear-gradient(90deg, var(--rosa), var(--rosa2));
-        }
-        .kpi-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-        .kpi-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-        .kpi-help { 
-            width: 18px; height: 18px; border-radius: 50%; 
-            background: var(--navy3); color: var(--muted); 
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; cursor: help; position: relative;
-        }
-        .kpi-help:hover::after {
-            content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
-            background: var(--navy3); color: var(--text); padding: 8px 12px; border-radius: 6px;
-            font-size: 11px; white-space: nowrap; z-index: 10; width: max-content;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid var(--border);
-        }
-        .kpi-value { 
-            font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--text);
-            margin-bottom: 4px;
-        }
-        .kpi-delta { font-size: 11px; display: flex; align-items: center; gap: 4px; }
-        .kpi-delta.up { color: var(--success); }
-        .kpi-delta.down { color: var(--danger); }
-        .kpi-desc { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
-        
-        /* ===== CHART CARD ===== */
-        .chart-card { 
-            background: var(--card); border: 1px solid var(--border); 
-            border-radius: 14px; padding: 20px; margin-bottom: 24px;
-        }
-        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
-        .chart-title { font-size: 16px; font-weight: 600; }
-        .chart-subtitle { font-size: 12px; color: var(--muted); }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+        .kpi-value { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+        .kpi-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 24px; }
         .chart-wrap { position: relative; height: 320px; width: 100%; }
-        
-        /* ===== TABS ===== */
-        .tab-content { display: none; animation: fadeUp 0.3s ease; }
+        .tab-content { display: none; }
         .tab-content.active { display: block; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* ===== TABLES ===== */
         .table-container { overflow-x: auto; margin-top: 12px; border-radius: 10px; border: 1px solid var(--border); }
         table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
-        th { 
-            text-align: left; padding: 14px 16px; color: var(--muted); 
-            text-transform: uppercase; font-size: 10px; font-weight: 600; 
-            background: var(--navy2); border-bottom: 1px solid var(--border);
-            position: sticky; top: 0;
-        }
+        th { text-align: left; padding: 14px 16px; color: var(--muted); text-transform: uppercase; font-size: 10px; font-weight: 600; background: var(--navy2); border-bottom: 1px solid var(--border); }
         td { padding: 14px 16px; border-bottom: 1px solid rgba(36,52,72,0.5); }
         tr:hover { background: rgba(232,55,90,0.05); }
-        
-        .status-badge { 
-            padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
-            display: inline-flex; align-items: center; gap: 4px;
-        }
-        .status-alert { background: rgba(232, 55, 90, 0.15); color: var(--rosa); border: 1px solid rgba(232,55,90,0.3); }
-        .status-warning { background: rgba(243, 156, 18, 0.15); color: var(--warning); border: 1px solid rgba(243,156,18,0.3); }
-        .status-success { background: rgba(46, 204, 113, 0.15); color: var(--success); border: 1px solid rgba(46,204,113,0.3); }
-        
-        .btn-wa { 
-            background: #25d366; color: white; border: none; 
-            padding: 8px 16px; border-radius: 8px; cursor: pointer; 
-            font-size: 12px; font-weight: 600; text-decoration: none; 
-            display: inline-flex; align-items: center; gap: 6px;
-            transition: 0.2s; white-space: nowrap;
-        }
-        .btn-wa:hover { background: #1ebc57; transform: translateY(-1px); }
-        
-        /* ===== TOAST NOTIFICATIONS ===== */
-        .toast-container { 
-            position: fixed; bottom: 20px; right: 20px; z-index: 1000; 
-            display: flex; flex-direction: column; gap: 10px; max-width: 320px;
-        }
-        .toast { 
-            background: var(--card); border: 1px solid var(--border); 
-            border-radius: 12px; padding: 14px 16px; 
-            display: flex; align-items: center; gap: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            animation: slideIn 0.3s ease;
-        }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .toast-icon { font-size: 18px; }
-        .toast-content { flex: 1; }
-        .toast-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
-        .toast-msg { font-size: 12px; color: var(--muted); }
-        .toast-close { 
-            background: none; border: none; color: var(--muted); 
-            cursor: pointer; font-size: 18px; padding: 4px;
-        }
-        
-        /* ===== LOADING STATE ===== */
-        .loading { 
-            display: flex; align-items: center; justify-content: center; 
-            padding: 40px; color: var(--muted); font-size: 13px;
-        }
-        .spinner { 
-            width: 20px; height: 20px; border: 2px solid var(--border); 
-            border-top-color: var(--rosa); border-radius: 50%; 
-            animation: spin 1s linear infinite; margin-right: 10px;
-        }
+        .btn-wa { background: #25d366; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .status-alert { background: rgba(232, 55, 90, 0.15); color: var(--rosa); }
+        .status-warning { background: rgba(243, 156, 18, 0.15); color: var(--warning); }
+        .status-success { background: rgba(46, 204, 113, 0.15); color: var(--success); }
+        .loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--muted); }
+        .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--rosa); border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1024px) {
-            .sidebar { width: 220px; }
-            .main { margin-left: 220px; padding: 20px; }
-        }
-        
         @media (max-width: 768px) {
-            .menu-toggle { display: flex; }
             .sidebar { transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); }
             .main { margin-left: 0; padding: 16px; }
-            
-            .page-header { flex-direction: column; align-items: flex-start; }
-            .header-right { width: 100%; justify-content: space-between; }
-            
             .kpi-grid { grid-template-columns: 1fr; }
-            .kpi-value { font-size: 28px; }
-            
-            .chart-wrap { height: 280px; }
-            
-            .filter-group { width: 100%; overflow-x: auto; padding: 4px; }
-            .filter-btn { flex-shrink: 0; }
-            
-            table { font-size: 12px; }
-            th, td { padding: 12px 10px; }
-            
-            .toast-container { left: 16px; right: 16px; max-width: none; }
         }
-        
-        @media (max-width: 480px) {
-            .logo-title { font-size: 18px; }
-            .page-title { font-size: 20px; }
-            .nav-item { padding: 12px 20px; font-size: 13px; }
-            .kpi-card { padding: 16px; }
-            .chart-card { padding: 16px; }
-            .chart-wrap { height: 240px; }
-        }
-        
-        /* ===== UTILS ===== */
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        .text-muted { color: var(--muted); }
-        .text-success { color: var(--success); }
-        .text-warning { color: var(--warning); }
-        .text-danger { color: var(--danger); }
-        .font-bold { font-weight: 600; }
-        .mt-8 { margin-top: 8px; }
-        .mb-8 { margin-bottom: 8px; }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-
-<!-- ===== SIDEBAR ===== -->
 <aside class="sidebar" id="sidebar">
     <div class="logo">
         <div class="logo-title">Morena Pitaya</div>
         <div class="logo-sub">CRM Dashboard</div>
     </div>
     <nav class="nav">
-        <div class="nav-item active" onclick="showTab('geral')" data-tab="geral">
-            <span class="icon">📊</span> Visão Geral
-        </div>
-        <div class="nav-item" onclick="showTab('reativacao')" data-tab="reativacao">
-            <span class="icon">⚠️</span> Reativação
-        </div>
-        <div class="nav-item" onclick="showTab('interacoes')" data-tab="interacoes">
-            <span class="icon">💬</span> Interações
-        </div>
-        <div class="nav-item" onclick="showTab('produtos')" data-tab="produtos">
-            <span class="icon">👗</span> Produtos
-        </div>
+        <div class="nav-item active" onclick="showTab('geral')">📊 Visão Geral</div>
+        <div class="nav-item" onclick="showTab('reativacao')">⚠️ Reativação</div>
+        <div class="nav-item" onclick="showTab('interacoes')">💬 Interações</div>
+        <div class="nav-item" onclick="showTab('produtos')">👗 Produtos</div>
     </nav>
-    <div class="sidebar-footer">
-        <div>v1.2 · Tempo Real</div>
-        <div id="version-info" class="mt-8" style="font-size:10px"></div>
-    </div>
 </aside>
 
-<!-- ===== MAIN CONTENT ===== -->
-<main class="main" id="main">
-    
-    <!-- Overlay para mobile -->
-    <div id="overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:90" onclick="toggleSidebar()"></div>
-    
+<main class="main">
     <header class="page-header">
-        <div class="header-left">
-            <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Menu">☰</button>
-            <h1 class="page-title">Dashboard Operacional</h1>
-        </div>
-        <div class="header-right">
-            <div class="status-indicator">
-                <span class="status-dot" id="connection-dot"></span>
-                <span id="connection-text">Conectado</span>
-            </div>
-            <div class="filter-group">
-                <button class="filter-btn" onclick="filterData('hoje', this)">Hoje</button>
-                <button class="filter-btn active" onclick="filterData('7d', this)">7 Dias</button>
-                <button class="filter-btn" onclick="filterData('30d', this)">30 Dias</button>
-                <button class="filter-btn" onclick="filterData('max', this)">Máximo</button>
-            </div>
+        <h1 class="page-title">Dashboard Operacional</h1>
+        <div class="filter-group">
+            <button class="filter-btn" onclick="filterData('hoje', this)">Hoje</button>
+            <button class="filter-btn active" onclick="filterData('7d', this)">7 Dias</button>
+            <button class="filter-btn" onclick="filterData('30d', this)">30 Dias</button>
         </div>
     </header>
 
-    <!-- ===== TAB: VISÃO GERAL ===== -->
     <section id="geral" class="tab-content active">
         <div class="kpi-grid">
             <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-title">👥 Leads Totais</div>
-                    <div class="kpi-help" data-tip="Pessoas que demonstraram interesse: preenchiram formulário, iniciaram checkout ou interagiram via WhatsApp/Instagram">?</div>
-                </div>
-                <div class="kpi-value" id="kpi-leads">4.800</div>
-                <div class="kpi-delta up" id="delta-leads">↑ 12% vs período anterior</div>
-                <div class="kpi-desc">Novos contatos qualificados no período selecionado</div>
+                <div class="kpi-label">👥 Total de Leads</div>
+                <div class="kpi-value" id="kpi-leads">-</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-title">💬 Interações</div>
-                    <div class="kpi-help" data-tip="Mensagens trocadas via WhatsApp, Instagram DM, comentários e respostas a campanhas">?</div>
-                </div>
-                <div class="kpi-value" id="kpi-interacoes">35.383</div>
-                <div class="kpi-delta up" id="delta-interacoes">↑ 8% vs período anterior</div>
-                <div class="kpi-desc">Total de trocas de mensagem com clientes</div>
+                <div class="kpi-label">💬 Total de Interações</div>
+                <div class="kpi-value" id="kpi-interacoes">-</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-title">🛒 Carrinhos</div>
-                    <div class="kpi-help" data-tip="Carrinhos abandonados que podem ser recuperados com mensagem personalizada">?</div>
-                </div>
-                <div class="kpi-value" id="kpi-carrinhos">142</div>
-                <div class="kpi-delta down" id="delta-carrinhos">↓ 5% vs período anterior</div>
-                <div class="kpi-desc">Oportunidades de recuperação ativa</div>
+                <div class="kpi-label">📱 Instagram</div>
+                <div class="kpi-value" id="kpi-instagram">-</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-title">⭐ Taxa de Conversão</div>
-                    <div class="kpi-help" data-tip="Porcentagem de leads que se tornaram clientes pagantes no período">?</div>
-                </div>
-                <div class="kpi-value" id="kpi-conversao">3.2%</div>
-                <div class="kpi-delta up" id="delta-conversao">↑ 0.4pp vs período anterior</div>
-                <div class="kpi-desc">Eficácia do funil de vendas</div>
+                <div class="kpi-label">💚 WhatsApp</div>
+                <div class="kpi-value" id="kpi-whatsapp">-</div>
             </div>
         </div>
-        
         <div class="chart-card">
-            <div class="chart-header">
-                <div>
-                    <div class="chart-title">📈 Evolução de Interações</div>
-                    <div class="chart-subtitle" id="chart-subtitle">Últimos 7 dias · Atualizado agora</div>
-                </div>
-                <button class="filter-btn" onclick="refreshData()" style="background:var(--navy3);color:var(--text)">🔄 Atualizar</button>
-            </div>
+            <h3 style="margin-bottom:16px">📈 Evolução de Interações</h3>
             <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
         </div>
     </section>
 
-    <!-- ===== TAB: REATIVAÇÃO ===== -->
     <section id="reativacao" class="tab-content">
         <div class="chart-card">
-            <div class="chart-header">
-                <div>
-                    <div class="chart-title">🚨 Prioridade de Reativação</div>
-                    <div class="chart-subtitle">Clientes com 7-14 dias sem contato + alto histórico de interação</div>
-                </div>
-            </div>
-            <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">
-                💡 <strong>Dica:</strong> Priorize contatos com mais interações e menor tempo de inatividade. 
-                Use o botão WhatsApp para mensagem personalizada.
-            </p>
+            <h3>🚨 Clientes para Reativação (7-14 dias sem contato)</h3>
             <div class="table-container">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Inatividade</th>
-                            <th>Interações</th>
-                            <th>Último Interesse</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="listaReativacao">
-                        <tr><td colspan="5" class="loading"><div class="spinner"></div>Carregando...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Cliente</th><th>Telefone</th><th>Último Contato</th><th>Dias Inativo</th><th>Canal</th><th>Ação</th></tr></thead>
+                    <tbody id="listaReativacao"><tr><td colspan="6" class="loading"><div class="spinner"></div>Carregando...</td></tr></tbody>
                 </table>
             </div>
         </div>
     </section>
 
-    <!-- ===== TAB: INTERAÇÕES ===== -->
     <section id="interacoes" class="tab-content">
         <div class="chart-card">
-            <div class="chart-header">
-                <div>
-                    <div class="chart-title">💬 Feed de Atendimento</div>
-                    <div class="chart-subtitle">Todas as interações do período selecionado</div>
-                </div>
-            </div>
+            <h3>💬 Últimas Interações</h3>
             <div class="table-container">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Data/Hora</th>
-                            <th>Cliente</th>
-                            <th>Canal</th>
-                            <th>Mensagem</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="listaFeed">
-                        <tr><td colspan="5" class="loading"><div class="spinner"></div>Carregando...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Data/Hora</th><th>Cliente</th><th>Canal</th><th>Mensagem</th><th>Tipo</th></tr></thead>
+                    <tbody id="listaFeed"><tr><td colspan="5" class="loading"><div class="spinner"></div>Carregando...</td></tr></tbody>
                 </table>
             </div>
         </div>
     </section>
 
-    <!-- ===== TAB: PRODUTOS ===== -->
     <section id="produtos" class="tab-content">
         <div class="chart-card">
-            <div class="chart-header">
-                <div>
-                    <div class="chart-title">👗 Top Produtos Consultados</div>
-                    <div class="chart-subtitle">Itens com maior interesse no período</div>
-                </div>
-            </div>
-            <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">
-                💡 <strong>Dica:</strong> Use esses dados para ajustar estoque, criar promoções direcionadas ou reforçar anúncios.
-            </p>
+            <h3>👗 Produtos Mais Mencionados</h3>
             <div class="table-container">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Cód</th>
-                            <th>Produto</th>
-                            <th>Consultas</th>
-                            <th>Tendência</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="listaProdutosBody">
-                        <tr><td colspan="5" class="loading"><div class="spinner"></div>Carregando...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Código</th><th>Produto</th><th>Categoria</th><th>Menções</th><th>Preço</th></tr></thead>
+                    <tbody id="listaProdutos"><tr><td colspan="5" class="loading"><div class="spinner"></div>Carregando...</td></tr></tbody>
                 </table>
             </div>
         </div>
     </section>
-
 </main>
 
-<!-- ===== TOAST CONTAINER ===== -->
-<div class="toast-container" id="toast-container"></div>
-
 <script>
-/**
- * 🎯 CRM Morena Pitaya - Dashboard com Tempo Real
- * 
- * Funcionalidades:
- * - Polling automático para atualização de dados
- * - Cache com localStorage para resiliência
- * - Indicadores visuais de conexão e última atualização
- * - Totalmente responsivo (mobile, tablet, desktop)
- * - Cards explicativos com tooltips
- * - Notificações toast para eventos importantes
- */
+// 🔑 CONFIGURAÇÃO SUPABASE - SUBSTITUA PELAS SUAS CREDENCIAIS
+const SUPABASE_URL = 'https://supabase.morenapitaya.com/';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzc2MDQ5MjAwLCJleHAiOjE5MzM4MTU2MDB9.PVvpnzkL7mdGkMKO1XCR2c8awZuZJ6NyeT_3qB06EMI';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ===== CONFIGURAÇÃO =====
-const CONFIG = {
-    // URL da API (substitua pelo seu endpoint real)
-    API_URL: 'https://api.morenapitaya.com.br/crm/data',
+let state = { currentPeriod: '7d', chart: null };
+
+// ===== QUERIES SQL OTIMIZADAS =====
+async function fetchData(period) {
+    const now = new Date();
+    let startDate;
     
-    // Intervalos de polling por período (em ms)
-    POLL_INTERVALS: { 
-        hoje: 30000,    // 30 segundos
-        '7d': 60000,    // 1 minuto
-        '30d': 120000,  // 2 minutos
-        max: 300000     // 5 minutos
-    },
-    
-    // Tempo de cache em ms (5 minutos)
-    CACHE_TTL: 5 * 60 * 1000,
-    
-    // Dados mockados para fallback/demo
-    MOCK_DATA: {
-        'hoje': {
-            leads: 42, interacoes: 1240, carrinhos: 8, conversao: 2.8,
-            labels: ['00h', '06h', '12h', '18h', 'Agora'],
-            data: [15, 8, 310, 520, 108],
-            delta: { leads: 5, interacoes: 3, carrinhos: -2, conversao: 0.2 },
-            produtos: [{cod: '0918', nome: 'Corselet', qtd: 45, trend: 'up'}, {cod: '0888', nome: 'Vestido', qtd: 32, trend: 'up'}],
-            reativacao: [], feed: []
-        },
-        '7d': {
-            leads: 4800, interacoes: 35383, carrinhos: 142, conversao: 3.2,
-            labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'],
-            data: [450, 580, 920, 660, 310, 400, 90],
-            delta: { leads: 12, interacoes: 8, carrinhos: -5, conversao: 0.4 },
-            produtos: [
-                {cod: '0918', nome: 'Corselet', qtd: 842, trend: 'up'}, 
-                {cod: '0773', nome: 'Blazer', qtd: 410, trend: 'stable'},
-                {cod: '0888', nome: 'Vestido', qtd: 380, trend: 'down'}
-            ],
-            reativacao: [],
-            feed: []
-        },
-        '30d': {
-            leads: 5120, interacoes: 120400, carrinhos: 480, conversao: 3.0,
-            labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
-            data: [2500, 3100, 2800, 3400],
-            delta: { leads: 8, interacoes: 5, carrinhos: -3, conversao: 0.1 },
-            produtos: [
-                {cod: '0411', nome: 'Calça', qtd: 1200, trend: 'up'}, 
-                {cod: '0918', nome: 'Corselet', qtd: 980, trend: 'up'}
-            ],
-            reativacao: [], feed: []
-        },
-        'max': {
-            leads: 6400, interacoes: 450000, carrinhos: 890, conversao: 2.9,
-            labels: ['Jan', 'Fev', 'Mar', 'Abr'],
-            data: [12000, 15000, 18000, 22000],
-            delta: { leads: 15, interacoes: 10, carrinhos: -8, conversao: 0.3 },
-            produtos: [
-                {cod: '0918', nome: 'Corselet', qtd: 5400, trend: 'up'}, 
-                {cod: '0888', nome: 'Vestido', qtd: 4200, trend: 'stable'}
-            ],
-            reativacao: [], feed: []
-        }
+    switch(period) {
+        case 'hoje': startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()); break;
+        case '7d': startDate = new Date(now); startDate.setDate(startDate.getDate() - 7); break;
+        case '30d': startDate = new Date(now); startDate.setDate(startDate.getDate() - 30); break;
+        default: startDate = new Date(now); startDate.setDate(startDate.getDate() - 7);
     }
-};
-
-// ===== ESTADO GLOBAL =====
-let state = {
-    currentPeriod: '7d',
-    pollInterval: null,
-    chart: null,
-    lastUpdate: null,
-    isOnline: true
-};
-
-// ===== BANCO DE DADOS LOCAL (Cache + Mock) =====
-const db = { ...CONFIG.MOCK_DATA };
-
-// ===== FUNÇÕES DE CACHE =====
-function getCacheKey(periodo) { return `crm_${periodo}`; }
-function getTimestampKey(periodo) { return `crm_${periodo}_ts`; }
-
-function getCachedData(periodo) {
+    
+    const startDateISO = startDate.toISOString();
+    
     try {
-        const cached = localStorage.getItem(getCacheKey(periodo));
-        const timestamp = localStorage.getItem(getTimestampKey(periodo));
+        // 1. Total de leads (contacts com status='lead')
+        const { count: totalLeads } = await supabase
+            .from('crm_contacts')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'lead');
         
-        if (cached && timestamp) {
-            const age = Date.now() - parseInt(timestamp);
-            if (age < CONFIG.CACHE_TTL) {
-                return JSON.parse(cached);
-            }
-        }
-    } catch (e) { console.warn('Erro ao ler cache:', e); }
-    return null;
-}
-
-function setCachedData(periodo, data) {
-    try {
-        localStorage.setItem(getCacheKey(periodo), JSON.stringify(data));
-        localStorage.setItem(getTimestampKey(periodo), Date.now());
-    } catch (e) { console.warn('Erro ao salvar cache:', e); }
-}
-
-// ===== FETCH DE DADOS (API Real + Fallback Mock) =====
-async function fetchData(periodo) {
-    // Tenta cache primeiro
-    const cached = getCachedData(periodo);
-    if (cached) {
-        console.log(`📦 Usando cache para ${periodo}`);
-        return { ...cached, fromCache: true };
-    }
-    
-    // Tenta API real
-    try {
-        const response = await fetch(`${CONFIG.API_URL}?periodo=${periodo}`, {
-            headers: { 
-                'Authorization': `Bearer ${localStorage.getItem('crm_token') || ''}`,
-                'Content-Type': 'application/json'
-            },
-            cache: 'no-store'
+        // 2. Total de interações no período
+        const { count: totalInteracoes } = await supabase
+            .from('crm_interactions')
+            .select('*', { count: 'exact', head: true })
+            .gte('created_at', startDateISO);
+        
+        // 3. Interações por canal
+        const { data: interactionsByChannel } = await supabase
+            .from('crm_interactions')
+            .select('channel')
+            .gte('created_at', startDateISO);
+        
+        const instagram = interactionsByChannel?.filter(i => i.channel === 'instagram').length || 0;
+        const whatsapp = interactionsByChannel?.filter(i => i.channel === 'whatsapp').length || 0;
+        
+        // 4. Evolução por dia (para gráfico)
+        const { data: dailyData } = await supabase
+            .from('crm_interactions')
+            .select('created_at')
+            .gte('created_at', startDateISO)
+            .order('created_at', { ascending: true });
+        
+        // Agrupa por dia
+        const dailyCount = {};
+        dailyData?.forEach(d => {
+            const date = new Date(d.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            dailyCount[date] = (dailyCount[date] || 0) + 1;
         });
         
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        // 5. Clientes para reativação (7-14 dias sem atualizar)
+        const { data: reativacao } = await supabase
+            .from('crm_contacts')
+            .select('id, nome, telefone, canal, updated_at, status')
+            .eq('status', 'lead')
+            .lte('updated_at', new Date(Date.now() - 7*24*60*60*1000).toISOString())
+            .gte('updated_at', new Date(Date.now() - 14*24*60*60*1000).toISOString())
+            .order('updated_at', { ascending: true })
+            .limit(20);
         
-        const data = await response.json();
-        setCachedData(periodo, data);
-        console.log(`✅ Dados atualizados da API para ${periodo}`);
-        return { ...data, fromCache: false };
+        // 6. Últimas interações
+        const { data: ultimasInteracoes } = await supabase
+            .from('crm_interactions')
+            .select(`
+                id,
+                message,
+                type,
+                channel,
+                created_at,
+                contact_id
+            `)
+            .gte('created_at', startDateISO)
+            .order('created_at', { ascending: false })
+            .limit(50);
+        
+        // 7. Produtos mais mencionados (extrai códigos das mensagens)
+        const { data: allProducts } = await supabase
+            .from('crm_products')
+            .select('codigo, name, category, price');
+        
+        // Conta menções de produtos nas interações
+        const productMentions = {};
+        interactionsByChannel?.forEach(interaction => {
+            const msg = interaction.message || '';
+            allProducts?.forEach(prod => {
+                if (msg.includes(prod.codigo)) {
+                    productMentions[prod.codigo] = (productMentions[prod.codigo] || 0) + 1;
+                }
+            });
+        });
+        
+        const topProdutos = Object.entries(productMentions)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .map(([codigo, count]) => {
+                const prod = allProducts?.find(p => p.codigo === codigo);
+                return {
+                    codigo,
+                    nome: prod?.name || 'Desconhecido',
+                    categoria: prod?.category || '-',
+                    preco: prod?.price || 0,
+                    count
+                };
+            });
+        
+        return {
+            totalLeads: totalLeads || 0,
+            totalInteracoes: totalInteracoes || 0,
+            instagram,
+            whatsapp,
+            chartLabels: Object.keys(dailyCount),
+            chartData: Object.values(dailyCount),
+            reativacao: reativacao || [],
+            interacoes: ultimasInteracoes || [],
+            produtos: topProdutos
+        };
         
     } catch (error) {
-        console.warn(`⚠️ Falha na API, usando mock:`, error.message);
-        updateConnectionStatus(false);
-        showToast('⚠️ Modo offline', 'Usando dados em cache', 'warning');
-        return { ...CONFIG.MOCK_DATA[periodo], fromCache: true, error: true };
+        console.error('Erro ao buscar dados:', error);
+        return null;
     }
 }
 
-// ===== ATUALIZAÇÃO DE UI =====
+// ===== ATUALIZAÇÃO DA UI =====
 function updateKPIs(data) {
-    // KPIs principais
-    animateValue('kpi-leads', data.leads);
-    animateValue('kpi-interacoes', data.interacoes);
-    animateValue('kpi-carrinhos', data.carrinhos);
-    document.getElementById('kpi-conversao').innerText = `${data.conversao}%`;
-    
-    // Deltas
-    updateDelta('delta-leads', data.delta?.leads, '%');
-    updateDelta('delta-interacoes', data.delta?.interacoes, '%');
-    updateDelta('delta-carrinhos', data.delta?.carrinhos, '%');
-    updateDelta('delta-conversao', data.delta?.conversao, 'pp');
-}
-
-function animateValue(elementId, endValue, duration = 500) {
-    const element = document.getElementById(elementId);
-    const startValue = parseInt(element.innerText.replace(/\D/g, '')) || 0;
-    const increment = (endValue - startValue) / (duration / 16);
-    let current = startValue;
-    
-    const timer = setInterval(() => {
-        current += increment;
-        if ((increment > 0 && current >= endValue) || (increment < 0 && current <= endValue)) {
-            element.innerText = endValue.toLocaleString('pt-BR');
-            clearInterval(timer);
-        } else {
-            element.innerText = Math.round(current).toLocaleString('pt-BR');
-        }
-    }, 16);
-}
-
-function updateDelta(elementId, value, unit) {
-    const element = document.getElementById(elementId);
-    if (value === undefined) {
-        element.innerHTML = '—';
-        return;
-    }
-    const isUp = value >= 0;
-    element.className = `kpi-delta ${isUp ? 'up' : 'down'}`;
-    const symbol = isUp ? '↑' : '↓';
-    element.innerHTML = `${symbol} ${Math.abs(value)}${unit} vs período anterior`;
+    document.getElementById('kpi-leads').innerText = data.totalLeads.toLocaleString('pt-BR');
+    document.getElementById('kpi-interacoes').innerText = data.totalInteracoes.toLocaleString('pt-BR');
+    document.getElementById('kpi-instagram').innerText = data.instagram.toLocaleString('pt-BR');
+    document.getElementById('kpi-whatsapp').innerText = data.whatsapp.toLocaleString('pt-BR');
 }
 
 function updateChart(data) {
-    if (!state.chart) return;
-    
-    state.chart.data.labels = data.labels;
-    state.chart.data.datasets[0].data = data.data;
-    state.chart.update('none'); // Atualização suave
-    
-    // Atualiza subtítulo do gráfico
-    const periodLabels = { hoje: 'Hoje', '7d': 'Últimos 7 dias', '30d': 'Últimos 30 dias', max: 'Histórico' };
-    const timeStr = state.lastUpdate ? `· Atualizado ${state.lastUpdate}` : '';
-    document.getElementById('chart-subtitle').innerText = `${periodLabels[state.currentPeriod]} ${timeStr}`;
-}
-
-function renderTabelas(data, periodo) {
-    renderReativacao(data.reativacao || generateMockReativacao());
-    renderProdutos(data.produtos || []);
-    renderFeed(data.feed || generateMockFeed());
-}
-
-function renderReativacao(clientes) {
-    const tbody = document.getElementById('listaReativacao');
-    if (!clientes.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhum cliente para reativação no período</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = clientes.slice(0, 20).map(c => {
-        const diasClass = c.dias <= 7 ? 'status-success' : c.dias <= 14 ? 'status-warning' : 'status-alert';
-        const msg = encodeURIComponent(`Olá ${c.nome}! 👋 Vi que você se interessou pelo ${c.produto}... Posso te ajudar com algo?`);
-        return `
-            <tr>
-                <td class="font-bold">${c.nome}</td>
-                <td><span class="status-badge ${diasClass}">${c.dias} dias</span></td>
-                <td>${c.interacoes}</td>
-                <td>${c.produto}</td>
-                <td><a href="https://wa.me/${c.tel}?text=${msg}" target="_blank" class="btn-wa">💬 WhatsApp</a></td>
-            </tr>
-        `;
-    }).join('');
-}
-
-function renderProdutos(produtos) {
-    const tbody = document.getElementById('listaProdutosBody');
-    if (!produtos.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhum produto registrado no período</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = produtos.map(p => {
-        const trendIcon = p.trend === 'up' ? '📈' : p.trend === 'down' ? '📉' : '➡️';
-        return `
-            <tr>
-                <td class="font-bold">${p.cod}</td>
-                <td>${p.nome}</td>
-                <td>${p.qtd.toLocaleString('pt-BR')}</td>
-                <td>${trendIcon}</td>
-                <td><button class="filter-btn" style="padding:4px 10px;font-size:11px">Ver detalhes</button></td>
-            </tr>
-        `;
-    }).join('');
-}
-
-function renderFeed(feed) {
-    const tbody = document.getElementById('listaFeed');
-    if (!feed.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhuma interação registrada no período</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = feed.slice(0, 50).map(f => {
-        const channelIcon = { whatsapp: '💚', instagram: '📸', site: '🌐', email: '✉️' }[f.canal] || '💬';
-        const statusClass = { enviado: 'status-success', pendente: 'status-warning', erro: 'status-alert' }[f.status] || 'status-alert';
-        return `
-            <tr>
-                <td>${formatDateTime(f.timestamp)}</td>
-                <td class="font-bold">${f.cliente}</td>
-                <td>${channelIcon} ${f.canal}</td>
-                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.mensagem}</td>
-                <td><span class="status-badge ${statusClass}">${f.status}</span></td>
-            </tr>
-        `;
-    }).join('');
-}
-
-// ===== MOCK DATA GENERATORS (para demo) =====
-function generateMockReativacao() {
-    const nomes = ['Ana Silva', 'Carla Souza', 'Juliana Costa', 'Mariana Lima', 'Beatriz Santos'];
-    const produtos = ['Corselet 0918', 'Vestido 0888', 'Blazer 0773', 'Calça 0411', 'Conjunto 0555'];
-    return Array.from({length: 15}, (_, i) => ({
-        nome: nomes[i % nomes.length] + ` ${i+1}`,
-        tel: `5531999${String(i+1).padStart(4, '0')}`,
-        dias: Math.floor(Math.random() * 8) + 7, // 7-14 dias
-        interacoes: Math.floor(Math.random() * 300) + 50,
-        produto: produtos[Math.floor(Math.random() * produtos.length)]
-    }));
-}
-
-function generateMockFeed() {
-    const canais = ['whatsapp', 'instagram', 'site', 'email'];
-    const mensagens = [
-        'Olá, gostaria de saber mais sobre o corselet',
-        'Esse vestido tem no meu tamanho?',
-        'Quando chega a nova coleção?',
-        'Posso parcelar em quantas vezes?',
-        'Recebi meu pedido, obrigada! ❤️'
-    ];
-    const statuses = ['enviado', 'pendente', 'enviado', 'enviado', 'pendente'];
-    
-    return Array.from({length: 30}, (_, i) => {
-        const hoursAgo = Math.floor(Math.random() * 168); // até 7 dias
-        return {
-            cliente: `Cliente ${i+1}`,
-            canal: canais[Math.floor(Math.random() * canais.length)],
-            mensagem: mensagens[Math.floor(Math.random() * mensagens.length)],
-            status: statuses[Math.floor(Math.random() * statuses.length)],
-            timestamp: new Date(Date.now() - hoursAgo * 60 * 60 * 1000).toISOString()
-        };
-    });
-}
-
-// ===== UTILITÁRIOS =====
-function formatDateTime(isoString) {
-    const date = new Date(isoString);
-    return date.toLocaleString('pt-BR', { 
-        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' 
-    });
-}
-
-function formatTimeAgo(isoString) {
-    const now = new Date();
-    const then = new Date(isoString);
-    const diff = Math.floor((now - then) / 1000);
-    
-    if (diff < 60) return 'agora';
-    if (diff < 3600) return `${Math.floor(diff/60)}min atrás`;
-    if (diff < 86400) return `${Math.floor(diff/3600)}h atrás`;
-    return `${Math.floor(diff/86400)}d atrás`;
-}
-
-function updateLastRefresh() {
-    state.lastUpdate = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    // O subtítulo do gráfico é atualizado em updateChart()
-}
-
-function updateConnectionStatus(online) {
-    state.isOnline = online;
-    const dot = document.getElementById('connection-dot');
-    const text = document.getElementById('connection-text');
-    
-    dot.className = `status-dot ${online ? '' : 'offline'}`;
-    text.innerText = online ? 'Conectado' : 'Offline · Cache';
-    
-    if (!online) {
-        showToast('📴 Conexão perdida', 'Dados em cache serão usados', 'warning');
-    } else {
-        showToast('📡 Reconectado', 'Dados atualizados da API', 'success');
-    }
-}
-
-// ===== TOAST NOTIFICATIONS =====
-function showToast(title, message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    const icons = { info: 'ℹ️', success: '✅', warning: '⚠️', error: '❌' };
-    
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerHTML = `
-        <span class="toast-icon">${icons[type] || icons.info}</span>
-        <div class="toast-content">
-            <div class="toast-title">${title}</div>
-            <div class="toast-msg">${message}</div>
-        </div>
-        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
-    `;
-    
-    container.appendChild(toast);
-    
-    // Auto-remove após 5 segundos
-    setTimeout(() => {
-        if (toast.parentElement) {
-            toast.style.animation = 'slideIn 0.3s ease reverse';
-            setTimeout(() => toast.remove(), 300);
-        }
-    }, 5000);
-}
-
-// ===== CHART.JS SETUP =====
-function initChart() {
-    const canvas = document.getElementById('mainChart');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    
-    // Gradiente para as barras
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(232, 55, 90, 0.9)');
-    gradient.addColorStop(1, 'rgba(255, 107, 138, 0.3)');
-    
-    state.chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: db['7d'].labels,
-            datasets: [{ 
-                label: 'Interações', 
-                data: db['7d'].data, 
-                backgroundColor: gradient,
-                borderRadius: 8,
-                borderSkipped: false
-            }]
-        },
-        options: {
-            responsive: true, 
-            maintainAspectRatio: false,
-            animation: { duration: 400, easing: 'easeOutQuart' },
-            plugins: { 
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: 'rgba(22, 32, 48, 0.95)',
-                    titleColor: '#e8edf3',
-                    bodyColor: '#7a94b0',
-                    borderColor: '#243448',
-                    borderWidth: 1,
-                    padding: 12,
-                    displayColors: false,
-                    callbacks: {
-                        label: (ctx) => `Interações: ${ctx.parsed.y.toLocaleString('pt-BR')}`
-                    }
-                }
+    if (!state.chart) {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        state.chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.chartLabels,
+                datasets: [{
+                    label: 'Interações',
+                    data: data.chartData,
+                    backgroundColor: '#e8375a',
+                    borderRadius: 6
+                }]
             },
-            scales: { 
-                y: { 
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }, 
-                    ticks: { 
-                        color: '#7a94b0',
-                        callback: (value) => value >= 1000 ? `${value/1000}k` : value
-                    }
-                }, 
-                x: { 
-                    grid: { display: false }, 
-                    ticks: { color: '#7a94b0', font: { size: 11 } } 
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { grid: { display: false } }
                 }
             }
-        }
-    });
-}
-
-// ===== CONTROLE DE ABAS =====
-function showTab(tabId) {
-    // Esconde todas as abas
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    // Mostra a selecionada
-    document.getElementById(tabId).classList.add('active');
-    
-    // Atualiza navegação
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.toggle('active', item.dataset.tab === tabId);
-    });
-    
-    // Fecha sidebar no mobile
-    if (window.innerWidth <= 768) {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('overlay').style.display = 'none';
-    }
-    
-    // Se for a aba de reativação ou produtos, força renderização
-    if (['reativacao', 'produtos', 'interacoes'].includes(tabId)) {
-        renderTabelas(db[state.currentPeriod], state.currentPeriod);
-    }
-}
-
-// ===== FILTRO DE PERÍODO =====
-async function filterData(periodo, button) {
-    // Atualiza UI dos botões
-    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    if (button) button.classList.add('active');
-    
-    state.currentPeriod = periodo;
-    
-    // Mostra loading nas tabelas
-    showTableLoading();
-    
-    // Busca dados
-    const data = await fetchData(periodo);
-    
-    // Atualiza tudo
-    updateKPIs(data);
-    updateChart(data);
-    renderTabelas(data, periodo);
-    updateLastRefresh();
-    
-    // Reinicia polling com novo intervalo
-    startPolling(periodo);
-    
-    // Notifica se veio do cache
-    if (data.fromCache) {
-        showToast('📦 Dados em cache', 'Atualização automática em andamento', 'info');
-    }
-}
-
-function showTableLoading() {
-    ['listaReativacao', 'listaFeed', 'listaProdutosBody'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.innerHTML = '<tr><td colspan="5" class="loading"><div class="spinner"></div>Atualizando...</td></tr>';
-        }
-    });
-}
-
-// ===== POLLING AUTOMÁTICO =====
-function startPolling(periodo) {
-    if (state.pollInterval) clearInterval(state.pollInterval);
-    
-    const interval = CONFIG.POLL_INTERVALS[periodo] || 60000;
-    
-    state.pollInterval = setInterval(async () => {
-        if (!document.hidden) { // Só atualiza se a aba estiver visível
-            console.log('🔄 Polling: atualizando dados...');
-            const data = await fetchData(periodo);
-            if (!data.error) {
-                updateKPIs(data);
-                updateChart(data);
-                // Só atualiza tabelas se estiver na aba correspondente
-                const activeTab = document.querySelector('.tab-content.active')?.id;
-                if (activeTab === 'reativacao' || activeTab === 'produtos' || activeTab === 'interacoes') {
-                    renderTabelas(data, periodo);
-                }
-                updateLastRefresh();
-            }
-        }
-    }, interval);
-    
-    console.log(`🕐 Polling iniciado para ${periodo}: ${interval/1000}s`);
-}
-
-// ===== ATUALIZAÇÃO MANUAL =====
-async function refreshData() {
-    showToast('🔄 Atualizando', 'Buscando dados mais recentes...', 'info');
-    
-    // Mostra loading visual
-    document.getElementById('connection-dot').style.animation = 'pulse 0.5s infinite';
-    
-    const data = await fetchData(state.currentPeriod);
-    
-    updateKPIs(data);
-    updateChart(data);
-    renderTabelas(data, state.currentPeriod);
-    updateLastRefresh();
-    
-    document.getElementById('connection-dot').style.animation = 'pulse 2s infinite';
-    
-    if (!data.error) {
-        showToast('✅ Atualizado', 'Dados sincronizados com sucesso', 'success');
-    }
-}
-
-// ===== SIDEBAR MOBILE =====
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    const main = document.getElementById('main');
-    
-    sidebar.classList.toggle('open');
-    
-    if (sidebar.classList.contains('open')) {
-        overlay.style.display = 'block';
-        main.style.filter = 'blur(2px)';
+        });
     } else {
-        overlay.style.display = 'none';
-        main.style.filter = 'none';
+        state.chart.data.labels = data.chartLabels;
+        state.chart.data.datasets[0].data = data.chartData;
+        state.chart.update();
     }
 }
 
-// ===== EVENT LISTENERS =====
-document.addEventListener('visibilitychange', () => {
-    // Quando voltar à aba, força atualização se estiver offline
-    if (!document.hidden && !state.isOnline) {
-        console.log('👁️ Aba visível + offline: tentando reconectar...');
-        fetchData(state.currentPeriod);
+function renderReativacao(data) {
+    const tbody = document.getElementById('listaReativacao');
+    if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">Nenhum cliente para reativação</td></tr>';
+        return;
     }
-});
+    
+    tbody.innerHTML = data.map(c => {
+        const dias = Math.floor((Date.now() - new Date(c.updated_at).getTime()) / (1000*60*60*24));
+        const msg = encodeURIComponent(`Olá ${c.nome || 'Cliente'}! 👋 Tudo bem?`);
+        return `
+            <tr>
+                <td>${c.nome || 'Sem nome'}</td>
+                <td>${c.telefone || '-'}</td>
+                <td>${new Date(c.updated_at).toLocaleString('pt-BR')}</td>
+                <td><span class="status-badge status-alert">${dias} dias</span></td>
+                <td>${c.canal || '-'}</td>
+                <td><a href="https://wa.me/${c.telefone}?text=${msg}" target="_blank" class="btn-wa">WhatsApp</a></td>
+            </tr>
+        `;
+    }).join('');
+}
 
-window.addEventListener('resize', () => {
-    // Fecha sidebar se mudar para desktop
-    if (window.innerWidth > 768) {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('overlay').style.display = 'none';
-        document.getElementById('main').style.filter = 'none';
+function renderInteracoes(data) {
+    const tbody = document.getElementById('listaFeed');
+    if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--muted)">Nenhuma interação no período</td></tr>';
+        return;
     }
-});
+    
+    tbody.innerHTML = data.slice(0, 30).map(i => `
+        <tr>
+            <td>${new Date(i.created_at).toLocaleString('pt-BR')}</td>
+            <td>Contato #${i.contact_id || '?'}</td>
+            <td>${i.channel === 'instagram' ? '📱' : '💚'} ${i.channel}</td>
+            <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.message || '-'}</td>
+            <td><span class="status-badge ${i.type === 'recebida' ? 'status-success' : 'status-warning'}">${i.type}</span></td>
+        </tr>
+    `).join('');
+}
+
+function renderProdutos(data) {
+    const tbody = document.getElementById('listaProdutos');
+    if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--muted)">Nenhum produto mencionado</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = data.map(p => `
+        <tr>
+            <td><strong>${p.codigo}</strong></td>
+            <td>${p.nome}</td>
+            <td>${p.categoria}</td>
+            <td>${p.count}</td>
+            <td>R$ ${p.preco.toFixed(2)}</td>
+        </tr>
+    `).join('');
+}
+
+// ===== CONTROLES =====
+async function filterData(period, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    state.currentPeriod = period;
+    
+    // Mostra loading
+    document.querySelectorAll('.kpi-value').forEach(el => el.innerText = '...');
+    
+    const data = await fetchData(period);
+    if (data) {
+        updateKPIs(data);
+        updateChart(data);
+        renderReativacao(data.reativacao);
+        renderInteracoes(data.interacoes);
+        renderProdutos(data.produtos);
+    }
+}
+
+function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach((item, idx) => {
+        item.classList.toggle('active', 
+            (tabId === 'geral' && idx === 0) ||
+            (tabId === 'reativacao' && idx === 1) ||
+            (tabId === 'interacoes' && idx === 2) ||
+            (tabId === 'produtos' && idx === 3)
+        );
+    });
+}
 
 // ===== INICIALIZAÇÃO =====
-async function init() {
-    console.log('🚀 CRM Morena Pitaya - Iniciando...');
+window.onload = () => {
+    filterData('7d', document.querySelector('.filter-btn.active'));
     
-    // Inicializa gráfico
-    initChart();
-    
-    // Carrega dados iniciais
-    const initialData = await fetchData('7d');
-    updateKPIs(initialData);
-    updateChart(initialData);
-    renderTabelas(initialData, '7d');
-    updateLastRefresh();
-    
-    // Inicia polling
-    startPolling('7d');
-    
-    // Verifica conexão inicial
-    if (initialData.error) {
-        updateConnectionStatus(false);
-    }
-    
-    // Info de versão
-    document.getElementById('version-info').innerText = `Cache: ${CONFIG.CACHE_TTL/60000}min · Polling: adaptativo`;
-    
-    console.log('✅ CRM inicializado com sucesso');
-}
-
-// ===== INICIA QUANDO DOM ESTIVER PRONTO =====
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
-}
+    // Auto-refresh a cada 60 segundos
+    setInterval(() => {
+        filterData(state.currentPeriod, document.querySelector('.filter-btn.active'));
+    }, 60000);
+};
 </script>
 </body>
 </html>
