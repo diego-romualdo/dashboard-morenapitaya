@@ -9,156 +9,113 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
         :root {
-            --rosa: #e8375a; --rosa2: #ff6b8a; --verde: #7ab648;
-            --navy: #0f1923; --navy2: #162030; --navy3: #1e2d40;
-            --card: #192535; --border: #243448;
-            --text: #e8edf3; --muted: #7a94b0;
-            --gold: #f5c842; --warning: #f39c12; --success: #2ecc71;
-            --sidebar-w: 240px;
+            --rosa:#e8375a; --rosa2:#ff6b8a; --verde:#7ab648;
+            --navy:#0f1923; --navy2:#162030; --navy3:#1e2d40;
+            --card:#192535; --border:#243448;
+            --text:#e8edf3; --muted:#7a94b0;
+            --warning:#f39c12; --success:#2ecc71;
+            --sidebar-w:240px;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; }
-        body { background: var(--navy); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html,body{height:100%}
+        body{background:var(--navy);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
 
-        /* ── Sidebar ── */
-        .sidebar {
-            position: fixed; top: 0; left: 0;
-            width: var(--sidebar-w); height: 100vh;
-            background: var(--navy2); border-right: 1px solid var(--border);
-            padding: 24px 0; z-index: 200;
-            transition: transform 0.3s ease;
-        }
-        .logo { padding: 0 24px 24px; border-bottom: 1px solid var(--border); }
-        .logo-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; color: var(--rosa); }
-        .logo-sub { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-top: 4px; }
-        .nav { padding: 16px 0; }
-        .nav-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 14px 24px; font-size: 14px; color: var(--muted);
-            cursor: pointer; transition: 0.2s; border-left: 3px solid transparent;
-            user-select: none;
-        }
-        .nav-item:hover, .nav-item.active {
-            color: var(--text); background: rgba(232,55,90,0.12); border-left-color: var(--rosa);
-        }
-        .realtime-dot {
-            width: 8px; height: 8px; border-radius: 50%; background: var(--verde);
-            margin-left: auto; animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        .sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--navy2);border-right:1px solid var(--border);padding:24px 0;z-index:200;transition:transform .3s ease}
+        .logo{padding:0 24px 24px;border-bottom:1px solid var(--border)}
+        .logo-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--rosa)}
+        .logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+        .nav{padding:16px 0}
+        .nav-item{display:flex;align-items:center;gap:12px;padding:14px 24px;font-size:14px;color:var(--muted);cursor:pointer;transition:.2s;border-left:3px solid transparent;user-select:none}
+        .nav-item:hover,.nav-item.active{color:var(--text);background:rgba(232,55,90,.12);border-left-color:var(--rosa)}
+        .realtime-dot{width:8px;height:8px;border-radius:50%;background:var(--verde);margin-left:auto;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-        /* ── Overlay mobile ── */
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 150; }
-        .overlay.show { display: block; }
+        .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150}
+        .overlay.show{display:block}
+        .hamburger{display:none;position:fixed;top:14px;left:14px;z-index:300;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;flex-direction:column;gap:5px;width:40px;align-items:center}
+        .hamburger span{display:block;width:20px;height:2px;background:var(--text);border-radius:2px}
 
-        /* ── Hamburger ── */
-        .hamburger {
-            display: none; position: fixed; top: 14px; left: 14px; z-index: 300;
-            background: var(--card); border: 1px solid var(--border);
-            border-radius: 8px; padding: 8px; cursor: pointer; flex-direction: column;
-            gap: 5px; width: 40px; align-items: center;
+        .main{margin-left:var(--sidebar-w);padding:24px;min-height:100vh}
+        .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+        .page-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700}
+        .header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+        .last-update{font-size:11px;color:var(--muted)}
+        .filter-group{display:flex;gap:4px;background:var(--navy2);padding:4px;border-radius:10px;border:1px solid var(--border)}
+        .filter-btn{background:transparent;border:none;color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;transition:.2s}
+        .filter-btn.active{background:var(--rosa);color:#fff}
+
+        .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+        .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+        .kpi-value{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--text);margin-bottom:4px}
+        .kpi-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+
+        .chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px}
+        .chart-card h3{margin-bottom:16px;font-size:15px}
+        .chart-wrap{position:relative;height:280px;width:100%}
+
+        .tab-content{display:none}
+        .tab-content.active{display:block}
+
+        .table-container{overflow-x:auto;margin-top:12px;border-radius:10px;border:1px solid var(--border)}
+        table{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
+        th{text-align:left;padding:12px 16px;color:var(--muted);text-transform:uppercase;font-size:10px;font-weight:600;background:var(--navy2);border-bottom:1px solid var(--border);white-space:nowrap}
+        td{padding:13px 16px;border-bottom:1px solid rgba(36,52,72,.5);vertical-align:middle}
+        tr:last-child td{border-bottom:none}
+        tr:hover td{background:rgba(232,55,90,.04)}
+
+        /* ── Cards reativação ── */
+        .react-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:12px}
+        .react-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:.2s}
+        .react-card:hover{border-color:rgba(232,55,90,.4);background:var(--navy3)}
+        .react-card-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .react-card-jid{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .react-card-tags{display:flex;flex-wrap:wrap;gap:6px}
+
+        /* ── Tags ── */
+        .tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+        .t-danger {background:rgba(232,55,90,.15);color:var(--rosa)}
+        .t-warn   {background:rgba(243,156,18,.15);color:var(--warning)}
+        .t-muted  {background:rgba(122,148,176,.10);color:var(--muted)}
+        .t-green  {background:rgba(122,214,72,.12);color:var(--verde)}
+        .t-wa     {background:rgba(37,211,102,.12);color:#25d366}
+
+        /* ── Badges tabela ── */
+        .badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+        .b-ig  {background:rgba(232,55,90,.12);color:var(--rosa2)}
+        .b-wa  {background:rgba(37,211,102,.12);color:#25d366}
+        .b-hi  {background:rgba(46,204,113,.15);color:var(--success)}
+        .b-mid {background:rgba(243,156,18,.15);color:var(--warning)}
+        .b-lo  {background:rgba(122,148,176,.12);color:var(--muted)}
+
+        .btn-wa{background:#25d366;color:#fff;border:none;padding:7px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+
+        .loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--muted)}
+        .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--rosa);border-radius:50%;animation:spin .9s linear infinite;margin-right:10px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .error-box{background:rgba(232,55,90,.1);border:1px solid rgba(232,55,90,.3);padding:16px;border-radius:10px;margin-bottom:20px;font-size:13px}
+        .empty-state{text-align:center;padding:48px 20px;color:var(--muted);font-size:13px}
+        .skeleton{background:linear-gradient(90deg,var(--navy3) 25%,var(--border) 50%,var(--navy3) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;display:inline-block;width:80px;height:30px}
+        @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+        @media(max-width:768px){
+            .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)))}
+            .sidebar.open{transform:translateX(0)}
+            .main{margin-left:0;padding:16px;padding-top:64px}
+            .hamburger{display:flex}
+            .kpi-grid{grid-template-columns:1fr 1fr}
+            .chart-wrap{height:200px}
+            .react-grid{grid-template-columns:1fr}
         }
-        .hamburger span { display: block; width: 20px; height: 2px; background: var(--text); border-radius: 2px; transition: 0.3s; }
-
-        /* ── Main content ── */
-        .main { margin-left: var(--sidebar-w); padding: 24px; min-height: 100vh; }
-        .page-header {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 24px; flex-wrap: wrap; gap: 16px;
-            padding-bottom: 16px; border-bottom: 1px solid var(--border);
-        }
-        .page-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; }
-        .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        .last-update { font-size: 11px; color: var(--muted); }
-        .filter-group {
-            display: flex; gap: 4px; background: var(--navy2);
-            padding: 4px; border-radius: 10px; border: 1px solid var(--border);
-        }
-        .filter-btn {
-            background: transparent; border: none; color: var(--muted);
-            padding: 8px 14px; border-radius: 8px; cursor: pointer;
-            font-size: 12px; font-weight: 500; transition: 0.2s;
-        }
-        .filter-btn.active { background: var(--rosa); color: white; }
-
-        /* ── KPI Cards ── */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-        .kpi-value {
-            font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700;
-            color: var(--text); margin-bottom: 4px;
-            transition: opacity 0.3s;
-        }
-        .kpi-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-
-        /* ── Charts / Cards ── */
-        .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 24px; }
-        .chart-card h3 { margin-bottom: 16px; font-size: 15px; }
-        .chart-wrap { position: relative; height: 280px; width: 100%; }
-
-        /* ── Tabs ── */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* ── Tables ── */
-        .table-container { overflow-x: auto; margin-top: 12px; border-radius: 10px; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 540px; }
-        th {
-            text-align: left; padding: 12px 16px; color: var(--muted);
-            text-transform: uppercase; font-size: 10px; font-weight: 600;
-            background: var(--navy2); border-bottom: 1px solid var(--border);
-            white-space: nowrap;
-        }
-        td { padding: 13px 16px; border-bottom: 1px solid rgba(36,52,72,0.5); }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: rgba(232,55,90,0.04); }
-
-        /* ── Badges / Buttons ── */
-        .btn-wa {
-            background: #25d366; color: white; border: none;
-            padding: 6px 14px; border-radius: 8px; cursor: pointer;
-            font-size: 12px; font-weight: 600; text-decoration: none;
-            display: inline-flex; align-items: center; gap: 5px;
-            white-space: nowrap;
-        }
-        .status-badge { padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
-        .status-alert   { background: rgba(232,55,90,0.15); color: var(--rosa); }
-        .status-warning { background: rgba(243,156,18,0.15); color: var(--warning); }
-        .status-success { background: rgba(46,204,113,0.15); color: var(--success); }
-        .status-neutral { background: rgba(122,148,176,0.15); color: var(--muted); }
-
-        /* ── Loading / Error ── */
-        .loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--muted); }
-        .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--rosa); border-radius: 50%; animation: spin 0.9s linear infinite; margin-right: 10px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .error-box { background: rgba(232,55,90,0.1); border: 1px solid rgba(232,55,90,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; }
-        .empty-row td { text-align: center; padding: 36px; color: var(--muted); font-size: 13px; }
-
-        /* ── Skeleton shimmer ── */
-        .skeleton { background: linear-gradient(90deg, var(--navy3) 25%, var(--border) 50%, var(--navy3) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; display: inline-block; width: 80px; height: 30px; }
-        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
-        /* ── Responsive ── */
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
-            .sidebar.open { transform: translateX(0); }
-            .main { margin-left: 0; padding: 16px; padding-top: 64px; }
-            .hamburger { display: flex; }
-            .kpi-grid { grid-template-columns: 1fr 1fr; }
-            .page-title { font-size: 18px; }
-            .chart-wrap { height: 220px; }
-        }
-        @media (max-width: 480px) {
-            .kpi-grid { grid-template-columns: 1fr; }
-            .filter-btn { padding: 7px 10px; font-size: 11px; }
+        @media(max-width:480px){
+            .kpi-grid{grid-template-columns:1fr}
+            .filter-btn{padding:7px 10px;font-size:11px}
         }
     </style>
 </head>
 <body>
 
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-
-<button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+<button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
     <span></span><span></span><span></span>
 </button>
 
@@ -168,10 +125,10 @@
         <div class="logo-sub">CRM Dashboard</div>
     </div>
     <nav class="nav">
-        <div class="nav-item active" data-tab="geral"     onclick="showTab('geral')">📊 Visão Geral <span class="realtime-dot" title="Atualização automática"></span></div>
-        <div class="nav-item"        data-tab="reativacao" onclick="showTab('reativacao')">⚠️ Reativação</div>
-        <div class="nav-item"        data-tab="interacoes" onclick="showTab('interacoes')">💬 Interações</div>
-        <div class="nav-item"        data-tab="produtos"   onclick="showTab('produtos')">👗 Produtos</div>
+        <div class="nav-item active" data-tab="geral"     onclick="showTab('geral')">📊 Visão Geral <span class="realtime-dot"></span></div>
+        <div class="nav-item"       data-tab="reativacao" onclick="showTab('reativacao')">⚠️ Reativação</div>
+        <div class="nav-item"       data-tab="interacoes" onclick="showTab('interacoes')">💬 Interações</div>
+        <div class="nav-item"       data-tab="produtos"   onclick="showTab('produtos')">👗 Produtos</div>
     </nav>
 </aside>
 
@@ -181,16 +138,16 @@
         <div class="header-right">
             <span class="last-update" id="lastUpdate">–</span>
             <div class="filter-group">
-                <button class="filter-btn"        onclick="setFilter('hoje', this)">Hoje</button>
-                <button class="filter-btn active" onclick="setFilter('7d',   this)">7 Dias</button>
-                <button class="filter-btn"        onclick="setFilter('30d',  this)">30 Dias</button>
+                <button class="filter-btn"        onclick="setFilter('hoje',this)">Hoje</button>
+                <button class="filter-btn active" onclick="setFilter('7d',  this)">7 Dias</button>
+                <button class="filter-btn"        onclick="setFilter('30d', this)">30 Dias</button>
             </div>
         </div>
     </header>
 
     <div id="error-container"></div>
 
-    <!-- ── VISÃO GERAL ── -->
+    <!-- VISÃO GERAL -->
     <section id="geral" class="tab-content active">
         <div class="kpi-grid">
             <div class="kpi-card"><div class="kpi-label">👥 Total de Contatos</div><div class="kpi-value" id="kpi-leads"><span class="skeleton"></span></div></div>
@@ -199,45 +156,51 @@
             <div class="kpi-card"><div class="kpi-label">💚 WhatsApp</div><div class="kpi-value" id="kpi-whatsapp"><span class="skeleton"></span></div></div>
         </div>
         <div class="chart-card">
-            <h3>📈 Evolução de Interações</h3>
+            <h3>📈 Interações por Dia</h3>
             <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
         </div>
     </section>
 
-    <!-- ── REATIVAÇÃO ── -->
+    <!-- REATIVAÇÃO -->
     <section id="reativacao" class="tab-content">
         <div class="chart-card">
-            <h3>🚨 Clientes para Reativação <small style="color:var(--muted);font-weight:400">(sem contato entre 7 e 14 dias)</small></h3>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Cliente</th><th>Telefone</th><th>Último Contato</th><th>Dias Inativo</th><th>Canal</th><th>Ação</th></tr></thead>
-                    <tbody id="listaReativacao"><tr><td colspan="6" class="loading"><div class="spinner"></div>Carregando...</td></tr></tbody>
-                </table>
-            </div>
+            <h3>🚨 Reativação WhatsApp <small style="color:var(--muted);font-weight:400">· sem contato entre 7 e 14 dias</small></h3>
+            <div id="listaReativacao"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
         </div>
     </section>
 
-    <!-- ── INTERAÇÕES ── -->
+    <!-- INTERAÇÕES -->
     <section id="interacoes" class="tab-content">
         <div class="chart-card">
-            <h3>💬 Feed de Interações Recentes</h3>
+            <h3>💬 Interações por Contato <small id="int-periodo" style="color:var(--muted);font-weight:400"></small></h3>
             <div class="table-container">
                 <table>
-                    <thead><tr><th>Data/Hora</th><th>Contato</th><th>Canal</th><th>Tipo</th></tr></thead>
-                    <tbody id="listaFeed"><tr><td colspan="4" class="loading"><div class="spinner"></div>Carregando...</td></tr></tbody>
+                    <thead>
+                        <tr>
+                            <th>Contato</th>
+                            <th>Última Interação</th>
+                            <th>Canal</th>
+                            <th>Qtd. no Período</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaFeed">
+                        <tr><td colspan="4" class="loading"><div class="spinner"></div>Carregando...</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
     </section>
 
-    <!-- ── PRODUTOS ── -->
+    <!-- PRODUTOS -->
     <section id="produtos" class="tab-content">
         <div class="chart-card">
             <h3>👗 Produtos Mais Mencionados</h3>
             <div class="table-container">
                 <table>
                     <thead><tr><th>Código</th><th>Produto</th><th>Categoria</th><th>Menções</th><th>Preço</th></tr></thead>
-                    <tbody id="listaProdutos"><tr><td colspan="5" class="loading"><div class="spinner"></div>Carregando...</td></tr></tbody>
+                    <tbody id="listaProdutos">
+                        <tr><td colspan="5" class="loading"><div class="spinner"></div>Carregando...</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -245,26 +208,23 @@
 </main>
 
 <script>
-// ═══════════════════════════════════════════
-// 🔑 CREDENCIAIS SUPABASE
-// ═══════════════════════════════════════════
-const SUPABASE_URL     = 'https://supabase.morenapitaya.com/';
+const SUPABASE_URL      = 'https://supabase.morenapitaya.com/';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzc2MDQ5MjAwLCJleHAiOjE5MzM4MTU2MDB9.PVvpnzkL7mdGkMKO1XCR2c8awZuZJ6NyeT_3qB06EMI';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const state = { period:'7d', chart:null, timer:null, loading:false };
 
-// ═══════════════════════════════════════════
-// 🗂 ESTADO GLOBAL
-// ═══════════════════════════════════════════
-const state = {
-    period: '7d',
-    chart:  null,
-    refreshTimer: null,
-    loading: false
-};
+// ── Helpers ──────────────────────────────────────────────
+function getStartDate(p) {
+    const n = new Date();
+    if (p === 'hoje') return new Date(n.getFullYear(), n.getMonth(), n.getDate()).toISOString();
+    const d = new Date(n); d.setDate(d.getDate() - (p === '30d' ? 30 : 7)); return d.toISOString();
+}
+function fmtNum(n)  { return Number(n||0).toLocaleString('pt-BR'); }
+function fmtDate(s) { return new Date(s).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function fmtDay(s)  { return new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
+function jidNum(j)  { return (j||'').replace(/@.*/,'').replace(/\D/g,''); }
 
-// ═══════════════════════════════════════════
-// 🧭 SIDEBAR MOBILE
-// ═══════════════════════════════════════════
+// ── Sidebar mobile ───────────────────────────────────────
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('overlay').classList.toggle('show');
@@ -274,303 +234,306 @@ function closeSidebar() {
     document.getElementById('overlay').classList.remove('show');
 }
 
-// ═══════════════════════════════════════════
-// 📅 PERÍODO → DATA ISO
-// ═══════════════════════════════════════════
-function getStartDate(period) {
-    const now = new Date();
-    switch (period) {
-        case 'hoje': return new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-        case '7d':   { const d = new Date(now); d.setDate(d.getDate() - 7);  return d.toISOString(); }
-        case '30d':  { const d = new Date(now); d.setDate(d.getDate() - 30); return d.toISOString(); }
-        default:     { const d = new Date(now); d.setDate(d.getDate() - 7);  return d.toISOString(); }
+// ── Paginação automática ─────────────────────────────────
+// Busca TODAS as linhas do período em lotes de 1000
+// para não ser limitado pelo default do Supabase
+async function fetchAllPaged(table, cols, startISO) {
+    const PAGE = 1000;
+    let all = [], from = 0;
+    while (true) {
+        const { data, error } = await sb
+            .from(table)
+            .select(cols.join(','))
+            .gte('criado_em', startISO)
+            .order('criado_em', { ascending: false })
+            .range(from, from + PAGE - 1);
+        if (error) throw error;
+        all = all.concat(data || []);
+        if (!data || data.length < PAGE) break;
+        from += PAGE;
     }
+    return all;
 }
 
-// ═══════════════════════════════════════════
-// 🔍 BUSCA DE DADOS — SCHEMA REAL
-// crm_contacts    → criado_em, atualizado_em, ultima_interacao,
-//                   estagio_funil, nome, canal_principal, tags, lead_score
-// crm_interactions→ criado_em, horario_msg, canal, tipo,
-//                   contact_id, mensagem, respondida, instancia
-// ═══════════════════════════════════════════
+// ── Fetch principal ──────────────────────────────────────
 async function fetchData(period) {
-    console.log(`🔍 Buscando dados · período: ${period}`);
+    console.log('Buscando dados, periodo:', period);
+    const startISO = getStartDate(period);
+    const label = period === 'hoje' ? 'hoje' : `últimos ${period === '7d' ? 7 : 30} dias`;
+    document.getElementById('int-periodo').textContent = '· ' + label;
+
     try {
-        const startDateISO = getStartDate(period);
-
-        // 1. TOTAL DE CONTATOS
-        const { count: totalContatos, error: errContatos } = await sb
+        // 1. COUNT de contatos (sem trazer linhas)
+        const { count: totalContatos, error: e1 } = await sb
             .from('crm_contacts')
-            .select('id', { count: 'exact', head: true });
-        if (errContatos) throw errContatos;
+            .select('id', { count:'exact', head:true });
+        if (e1) throw e1;
 
-        // 2. INTERAÇÕES DO PERÍODO
-        // ✅ FIX: created_at → criado_em | type → tipo
-        const { data: interactions, error: errInt } = await sb
-            .from('crm_interactions')
-            .select('id, canal, criado_em, contact_id, tipo, mensagem, respondida')
-            .gte('criado_em', startDateISO)
-            .order('criado_em', { ascending: false })
-            .limit(2000);
-        if (errInt) throw errInt;
+        // 2. COUNTs de interações NO BANCO — resolve o problema do limite de 2000
+        //    Três queries paralelas com head:true: total, instagram, whatsapp
+        const [rTotal, rIG, rWA] = await Promise.all([
+            sb.from('crm_interactions').select('id',{count:'exact',head:true}).gte('criado_em', startISO),
+            sb.from('crm_interactions').select('id',{count:'exact',head:true}).gte('criado_em', startISO).eq('canal','instagram'),
+            sb.from('crm_interactions').select('id',{count:'exact',head:true}).gte('criado_em', startISO).eq('canal','whatsapp'),
+        ]);
+        if (rTotal.error) throw rTotal.error;
+        if (rIG.error)    throw rIG.error;
+        if (rWA.error)    throw rWA.error;
 
-        const totalInteracoes = interactions?.length ?? 0;
-        const instagram = interactions?.filter(i => i.canal === 'instagram').length ?? 0;
-        const whatsapp  = interactions?.filter(i => i.canal === 'whatsapp').length  ?? 0;
+        const totalInteracoes = rTotal.count || 0;
+        const instagram       = rIG.count    || 0;
+        const whatsapp        = rWA.count    || 0;
 
-        // Agrupamento diário → gráfico (usa criado_em)
-        const dailyCount = {};
-        (interactions ?? []).forEach(d => {
-            const label = new Date(d.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-            dailyCount[label] = (dailyCount[label] || 0) + 1;
+        // 3. Dados do gráfico — só criado_em, paginado
+        const chartRows = await fetchAllPaged('crm_interactions', ['criado_em'], startISO);
+        const daily = {};
+        chartRows.forEach(r => {
+            const k = fmtDay(r.criado_em);
+            daily[k] = (daily[k] || 0) + 1;
+        });
+        const sortedDays = Object.keys(daily).sort((a, b) => {
+            const parse = s => { const [d,m] = s.split('/').map(Number); return m*100+d; };
+            return parse(a) - parse(b);
         });
 
-        // 3. REATIVAÇÃO
-        // ✅ FIX: updated_at → atualizado_em | telefone → remote_jid (não existe telefone)
-        //         canal → canal_principal | removido status filter
-        const sevenDaysAgo    = new Date(Date.now() -  7*86400000).toISOString();
-        const fourteenDaysAgo = new Date(Date.now() - 14*86400000).toISOString();
+        // 4. Interações agrupadas por contato — paginado, só colunas necessárias
+        const intRows = await fetchAllPaged('crm_interactions', ['contact_id','criado_em','canal'], startISO);
+        const byContact = {};
+        intRows.forEach(r => {
+            const k = r.contact_id;
+            if (!byContact[k]) byContact[k] = { contact_id:k, canal:r.canal, ultima:r.criado_em, count:0 };
+            byContact[k].count++;
+            if (r.criado_em > byContact[k].ultima) byContact[k].ultima = r.criado_em;
+        });
+        const grouped = Object.values(byContact).sort((a,b) => b.count - a.count).slice(0, 100);
 
-        const { data: reativacao, error: errReat } = await sb
+        // 5. Nomes dos top contatos (batch de 50)
+        const topIds = grouped.map(c => c.contact_id).filter(Boolean).slice(0, 50);
+        let nomeMap = {};
+        if (topIds.length) {
+            const { data: nomes } = await sb.from('crm_contacts')
+                .select('id, nome, remote_jid').in('id', topIds);
+            (nomes||[]).forEach(n => { nomeMap[n.id] = { nome: n.nome, jid: n.remote_jid }; });
+        }
+
+        // 6. Reativação — só WhatsApp, sem contato entre 7 e 14 dias
+        const sevenAgo    = new Date(Date.now() -  7*86400000).toISOString();
+        const fourteenAgo = new Date(Date.now() - 14*86400000).toISOString();
+        const { data: reativacao, error: eR } = await sb
             .from('crm_contacts')
-            .select('id, nome, remote_jid, canal_principal, atualizado_em, estagio_funil, lead_score')
-            .lte('atualizado_em', sevenDaysAgo)
-            .gte('atualizado_em', fourteenDaysAgo)
+            .select('id, nome, remote_jid, canal_principal, atualizado_em, estagio_funil, lead_score, total_mensagens')
+            .eq('canal_principal', 'whatsapp')
+            .lte('atualizado_em', sevenAgo)
+            .gte('atualizado_em', fourteenAgo)
             .order('atualizado_em', { ascending: true })
-            .limit(50);
-        if (errReat) throw errReat;
+            .limit(60);
+        if (eR) throw eR;
 
-        // 4. PRODUTOS (tabela pode ainda não existir)
+        // 7. Produtos
         let produtos = [];
         try {
-            const { data: prods, error: errProd } = await sb
-                .from('crm_products')
+            const { data: p } = await sb.from('crm_products')
                 .select('codigo, nome, categoria, preco, mencoes')
-                .order('mencoes', { ascending: false })
-                .limit(20);
-            if (!errProd) produtos = prods ?? [];
-        } catch (_) { /* tabela não existe ainda */ }
+                .order('mencoes', { ascending: false }).limit(20);
+            if (p) produtos = p;
+        } catch(_) {}
 
         document.getElementById('error-container').innerHTML = '';
-
-        return {
-            totalContatos:    totalContatos ?? 0,
-            totalInteracoes,
-            instagram,
-            whatsapp,
-            chartLabels: Object.keys(dailyCount),
-            chartData:   Object.values(dailyCount),
-            reativacao:  reativacao ?? [],
-            interacoes:  interactions ?? [],
-            produtos
-        };
+        return { totalContatos, totalInteracoes, instagram, whatsapp,
+                 chartLabels: sortedDays, chartData: sortedDays.map(d => daily[d]),
+                 reativacao: reativacao || [], interacoes: grouped, nomeMap, produtos };
 
     } catch (err) {
-        console.error('❌ ERRO SUPABASE:', err.message);
-        console.error('📋 DETAILS:', err.details ?? 'N/A');
-        console.error('💡 HINT:', err.hint ?? 'N/A');
-
-        document.getElementById('error-container').innerHTML = `
-            <div class="error-box">
-                ⚠️ <strong>Falha ao conectar com o Supabase:</strong> ${err.message}
-                ${err.hint ? `<br><small>💡 ${err.hint}</small>` : ''}
-                <br><small>Verifique o console (F12) para detalhes.</small>
-            </div>`;
-
-        return getDemoData();
+        console.error('SUPABASE ERROR:', err.message, err.hint || '');
+        document.getElementById('error-container').innerHTML =
+            `<div class="error-box">⚠️ <strong>${err.message}</strong>${err.hint ? '<br><small>'+err.hint+'</small>' : ''}</div>`;
+        return getDemoData(period);
     }
 }
 
-// ═══════════════════════════════════════════
-// 📦 DEMO FALLBACK
-// ═══════════════════════════════════════════
-function getDemoData() {
-    const now = Date.now();
+// ── Demo fallback ─────────────────────────────────────────
+function getDemoData(period) {
+    const days = period === '30d' ? 30 : period === 'hoje' ? 1 : 7;
+    const labels = [], vals = [];
+    for (let i = days-1; i >= 0; i--) {
+        labels.push(fmtDay(new Date(Date.now()-i*86400000).toISOString()));
+        vals.push(50 + Math.floor(Math.random()*400));
+    }
     return {
-        totalContatos: 4779,
-        totalInteracoes: 35383,
-        instagram: 22400,
-        whatsapp: 12983,
-        chartLabels: ['11/04','12/04','13/04','14/04','15/04','16/04','17/04'],
-        chartData:   [340, 510, 380, 620, 490, 310, 280],
-        reativacao: [
-            { id: 'C-1024', nome: 'Exemplo Cliente 1', remote_jid: '5531999887766@s.whatsapp.net', canal_principal: 'instagram', atualizado_em: new Date(now - 9*86400000).toISOString() },
-            { id: 'C-0892', nome: 'Exemplo Cliente 2', remote_jid: '5531988776655@s.whatsapp.net', canal_principal: 'whatsapp',  atualizado_em: new Date(now - 11*86400000).toISOString() }
+        totalContatos:4779, totalInteracoes:35383, instagram:22400, whatsapp:12983,
+        chartLabels:labels, chartData:vals,
+        reativacao:[
+            {id:1,nome:'Fernanda Lima',remote_jid:'5531999887766@s.whatsapp.net',canal_principal:'whatsapp',
+             atualizado_em:new Date(Date.now()-9*86400000).toISOString(),estagio_funil:'lead',lead_score:72,total_mensagens:14},
+            {id:2,nome:'Ana Paula Souza',remote_jid:'5531988776655@s.whatsapp.net',canal_principal:'whatsapp',
+             atualizado_em:new Date(Date.now()-12*86400000).toISOString(),estagio_funil:'qualificado',lead_score:85,total_mensagens:28},
         ],
-        interacoes: [
-            { id: 1, contact_id: 'C-1024', canal: 'instagram', tipo: 'recebida', criado_em: new Date(now - 300000).toISOString() },
-            { id: 2, contact_id: 'C-0892', canal: 'whatsapp',  tipo: 'enviada',  criado_em: new Date(now - 600000).toISOString() }
+        interacoes:[
+            {contact_id:101,canal:'instagram',ultima:new Date(Date.now()-600000).toISOString(),count:42},
+            {contact_id:102,canal:'whatsapp', ultima:new Date(Date.now()-1200000).toISOString(),count:17},
         ],
-        produtos: []
+        nomeMap:{101:{nome:'Demo Contato A',jid:''},102:{nome:'Demo Contato B',jid:'55319990000@s.whatsapp.net'}},
+        produtos:[]
     };
 }
 
-// ═══════════════════════════════════════════
-// 🖼 RENDERIZAÇÃO
-// ═══════════════════════════════════════════
-function updateKPIs(data) {
-    document.getElementById('kpi-leads').textContent      = data.totalContatos.toLocaleString('pt-BR');
-    document.getElementById('kpi-interacoes').textContent = data.totalInteracoes.toLocaleString('pt-BR');
-    document.getElementById('kpi-instagram').textContent  = data.instagram.toLocaleString('pt-BR');
-    document.getElementById('kpi-whatsapp').textContent   = data.whatsapp.toLocaleString('pt-BR');
+// ── KPIs ──────────────────────────────────────────────────
+function updateKPIs(d) {
+    document.getElementById('kpi-leads').textContent      = fmtNum(d.totalContatos);
+    document.getElementById('kpi-interacoes').textContent = fmtNum(d.totalInteracoes);
+    document.getElementById('kpi-instagram').textContent  = fmtNum(d.instagram);
+    document.getElementById('kpi-whatsapp').textContent   = fmtNum(d.whatsapp);
 }
 
-function updateChart(data) {
+// ── Gráfico ───────────────────────────────────────────────
+function updateChart(d) {
     const ctx = document.getElementById('mainChart').getContext('2d');
     if (!state.chart) {
         state.chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.chartLabels,
-                datasets: [{
-                    label: 'Interações',
-                    data: data.chartData,
-                    backgroundColor: 'rgba(232,55,90,0.75)',
-                    hoverBackgroundColor: '#e8375a',
-                    borderRadius: 6,
-                    borderSkipped: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a94b0' } },
-                    x: { grid: { display: false }, ticks: { color: '#7a94b0' } }
+            type:'bar',
+            data:{ labels:d.chartLabels, datasets:[{
+                label:'Interações', data:d.chartData,
+                backgroundColor:'rgba(232,55,90,.7)', hoverBackgroundColor:'#e8375a',
+                borderRadius:6, borderSkipped:false
+            }]},
+            options:{
+                responsive:true, maintainAspectRatio:false,
+                plugins:{legend:{display:false}},
+                scales:{
+                    y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#7a94b0'}},
+                    x:{grid:{display:false},ticks:{color:'#7a94b0'}}
                 }
             }
         });
     } else {
-        state.chart.data.labels = data.chartLabels;
-        state.chart.data.datasets[0].data = data.chartData;
+        state.chart.data.labels = d.chartLabels;
+        state.chart.data.datasets[0].data = d.chartData;
         state.chart.update('active');
     }
 }
 
+// ── Reativação ────────────────────────────────────────────
 function renderReativacao(list) {
-    const tbody = document.getElementById('listaReativacao');
+    const wrap = document.getElementById('listaReativacao');
     if (!list.length) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="6">✅ Nenhum cliente para reativação no momento</td></tr>';
+        wrap.innerHTML = '<div class="empty-state">✅ Nenhum contato WhatsApp para reativação agora</div>';
         return;
     }
-    tbody.innerHTML = list.map(c => {
-        const dias = Math.floor((Date.now() - new Date(c.atualizado_em).getTime()) / 86400000);
-        const jid = (c.remote_jid || '').replace(/@.*/,'').replace(/D/g,'');
-        const msg  = encodeURIComponent('Olá! 👋 Sumiu, maravilhosa! Posso te ajudar com algo?');
-        const nome = c.nome || c.remote_jid || ('#'+c.id);
-        const badge = dias >= 12 ? 'status-alert' : 'status-warning';
-        return `<tr>
-            <td>${nome}</td>
-            <td style="color:var(--muted)">${c.remote_jid || '-'}</td>
-            <td>${new Date(c.atualizado_em).toLocaleString('pt-BR')}</td>
-            <td><span class="status-badge ${badge}">${dias} dias</span></td>
-            <td>${c.canal_principal || '-'}</td>
-            <td>${jid ? `<a href="https://wa.me/${jid}?text=${msg}" target="_blank" rel="noopener" class="btn-wa">💬 WA</a>` : '-'}</td>
-        </tr>`;
-    }).join('');
+    const msgEnc = encodeURIComponent('Olá! 👋 Sumiu, maravilhosa! Posso te ajudar com algo? 🌸');
+    wrap.innerHTML = '<div class="react-grid">' + list.map(c => {
+        const dias  = Math.floor((Date.now() - new Date(c.atualizado_em).getTime()) / 86400000);
+        const num   = jidNum(c.remote_jid);
+        const nome  = c.nome || c.remote_jid || '#' + c.id;
+        const dCls  = dias >= 12 ? 't-danger' : 't-warn';
+        return `<div class="react-card">
+            <div>
+                <div class="react-card-name">💚 ${nome}</div>
+                <div class="react-card-jid">${c.remote_jid || 'sem número'}</div>
+            </div>
+            <div class="react-card-tags">
+                <span class="tag ${dCls}">⏱ ${dias} dias inativo</span>
+                <span class="tag t-wa">💚 WhatsApp</span>
+                <span class="tag t-muted">📅 ${fmtDate(c.atualizado_em)}</span>
+                ${c.estagio_funil ? `<span class="tag t-muted">🔖 ${c.estagio_funil}</span>` : ''}
+                ${c.lead_score    ? `<span class="tag t-green">⭐ Score ${c.lead_score}</span>` : ''}
+                ${c.total_mensagens ? `<span class="tag t-muted">💬 ${fmtNum(c.total_mensagens)} msgs</span>` : ''}
+            </div>
+            <div>
+                ${num
+                    ? `<a href="https://wa.me/${num}?text=${msgEnc}" target="_blank" rel="noopener" class="btn-wa">💬 Iniciar conversa</a>`
+                    : '<span style="font-size:12px;color:var(--muted)">Sem número disponível</span>'}
+            </div>
+        </div>`;
+    }).join('') + '</div>';
 }
 
-function renderInteracoes(list) {
+// ── Interações ────────────────────────────────────────────
+function renderInteracoes(list, nomeMap) {
     const tbody = document.getElementById('listaFeed');
     if (!list.length) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nenhuma interação no período</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">Nenhuma interação no período</div></td></tr>';
         return;
     }
-    const canalIcon = { instagram: '📱', whatsapp: '💚', email: '📧' };
-    tbody.innerHTML = list.slice(0, 50).map(i => {
-        const badge = i.tipo === 'recebida' ? 'status-success' : i.tipo === 'enviada' ? 'status-warning' : 'status-neutral';
-        const icon  = canalIcon[i.canal] ?? '🔔';
+    const canalBadge = {
+        instagram: '<span class="badge b-ig">📱 Instagram</span>',
+        whatsapp:  '<span class="badge b-wa">💚 WhatsApp</span>',
+    };
+    tbody.innerHTML = list.map(i => {
+        const info  = nomeMap[i.contact_id] || {};
+        const nome  = info.nome || 'Contato #' + i.contact_id;
+        const canal = canalBadge[i.canal] || `<span class="badge b-lo">${i.canal||'?'}</span>`;
+        const qCls  = i.count >= 20 ? 'b-hi' : i.count >= 5 ? 'b-mid' : 'b-lo';
         return `<tr>
-            <td style="white-space:nowrap;color:var(--muted)">${new Date(i.criado_em).toLocaleString('pt-BR')}</td>
-            <td>Contato #${i.contact_id ?? '?'}</td>
-            <td>${icon} ${i.canal ?? '-'}</td>
-            <td><span class="status-badge ${badge}">${i.tipo ?? '-'}</span></td>
+            <td><strong>${nome}</strong></td>
+            <td style="color:var(--muted);white-space:nowrap">${fmtDate(i.ultima)}</td>
+            <td>${canal}</td>
+            <td><span class="badge ${qCls}">${fmtNum(i.count)}</span></td>
         </tr>`;
     }).join('');
 }
 
+// ── Produtos ──────────────────────────────────────────────
 function renderProdutos(list) {
     const tbody = document.getElementById('listaProdutos');
     if (!list.length) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nenhum produto registrado ainda</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">Nenhum produto registrado ainda</div></td></tr>';
         return;
     }
     tbody.innerHTML = list.map(p => `<tr>
-        <td style="color:var(--muted)">${p.codigo ?? '-'}</td>
-        <td>${p.nome ?? '-'}</td>
-        <td>${p.categoria ?? '-'}</td>
-        <td><strong>${(p.mencoes ?? 0).toLocaleString('pt-BR')}</strong></td>
-        <td>${p.preco ? 'R$ ' + Number(p.preco).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '-'}</td>
+        <td style="color:var(--muted)">${p.codigo||'-'}</td>
+        <td>${p.nome||'-'}</td>
+        <td>${p.categoria||'-'}</td>
+        <td><strong>${fmtNum(p.mencoes)}</strong></td>
+        <td>${p.preco ? 'R$ '+Number(p.preco).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '-'}</td>
     </tr>`).join('');
 }
 
-function setLastUpdate() {
-    document.getElementById('lastUpdate').textContent = 'Atualizado às ' +
-        new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-}
-
-// ═══════════════════════════════════════════
-// 🔄 ATUALIZAÇÃO COMPLETA
-// ═══════════════════════════════════════════
-async function refresh(period, skipSkeleton) {
+// ── Refresh ───────────────────────────────────────────────
+async function refresh(period, silent) {
     if (state.loading) return;
     state.loading = true;
-
-    if (!skipSkeleton) {
+    if (!silent) {
         document.querySelectorAll('.kpi-value').forEach(el => el.innerHTML = '<span class="skeleton"></span>');
-        document.getElementById('listaReativacao').innerHTML = '<tr><td colspan="6" class="loading"><div class="spinner"></div>Atualizando...</td></tr>';
-        document.getElementById('listaFeed').innerHTML       = '<tr><td colspan="4" class="loading"><div class="spinner"></div>Atualizando...</td></tr>';
-        document.getElementById('listaProdutos').innerHTML   = '<tr><td colspan="5" class="loading"><div class="spinner"></div>Atualizando...</td></tr>';
+        document.getElementById('listaReativacao').innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
+        document.getElementById('listaFeed').innerHTML       = '<tr><td colspan="4" class="loading"><div class="spinner"></div>Carregando...</td></tr>';
+        document.getElementById('listaProdutos').innerHTML   = '<tr><td colspan="5" class="loading"><div class="spinner"></div>Carregando...</td></tr>';
     }
-
     try {
         const data = await fetchData(period);
         updateKPIs(data);
         updateChart(data);
         renderReativacao(data.reativacao);
-        renderInteracoes(data.interacoes);
+        renderInteracoes(data.interacoes, data.nomeMap);
         renderProdutos(data.produtos);
-        setLastUpdate();
+        document.getElementById('lastUpdate').textContent =
+            'Atualizado às ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     } finally {
         state.loading = false;
     }
 }
 
-// ═══════════════════════════════════════════
-// 🕐 FILTRO DE PERÍODO
-// ═══════════════════════════════════════════
+// ── Filtro e tabs ─────────────────────────────────────────
 function setFilter(period, btn) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     state.period = period;
-
-    // Reinicia timer de auto-refresh
-    clearInterval(state.refreshTimer);
+    clearInterval(state.timer);
     refresh(period, false);
-    state.refreshTimer = setInterval(() => refresh(state.period, true), 60000); // 60s
+    state.timer = setInterval(() => refresh(state.period, true), 60000);
 }
 
-// ═══════════════════════════════════════════
-// 🗂 TABS
-// ═══════════════════════════════════════════
 function showTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.toggle('active', item.dataset.tab === tabId);
-    });
-    closeSidebar(); // fecha menu mobile ao navegar
+    document.querySelectorAll('.nav-item').forEach(item =>
+        item.classList.toggle('active', item.dataset.tab === tabId));
+    closeSidebar();
 }
 
-// ═══════════════════════════════════════════
-// 🚀 INICIALIZAÇÃO
-// ═══════════════════════════════════════════
+// ── Init ──────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-    const activeBtn = document.querySelector('.filter-btn.active');
     refresh(state.period, false);
-    state.refreshTimer = setInterval(() => refresh(state.period, true), 60000);
+    state.timer = setInterval(() => refresh(state.period, true), 60000);
 });
 </script>
 </body>
