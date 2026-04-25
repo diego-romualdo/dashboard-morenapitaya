@@ -710,7 +710,7 @@ function renderReativacao(list) {
         wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div>Nenhum contato WhatsApp para reativação neste filtro</div>';
         return;
     }
-    const msgEnc = encodeURIComponent('Olá! 👋 Sumiu, maravilhosa! Posso te ajudar com algo? 🌸');
+    const msgEnc = encodeURIComponent('Oiê!! 👋 Você sumiu, maravilhosa! Depois eu quero te mostrar as novidades... Pode ser? 🌸');
     wrap.innerHTML = '<div class="react-grid">' + list.map(c => {
         const dias  = Math.floor((Date.now() - new Date(c.atualizado_em).getTime()) / 86400000);
         const num   = jidNum(c.remote_jid);
