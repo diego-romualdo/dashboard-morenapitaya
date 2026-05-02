@@ -699,47 +699,84 @@ function updateChart(d) {
 // ─────────────────────────────────────────────────────────
 function updateTop10Chart(d) {
     const top10  = (d.procurados||[]).slice(0, 10);
-    const labels = top10.map(p => p.nome ? `${p.codigo} · ${p.nome}` : `${p.codigo} · (sem cadastro)`);
-    const vals   = top10.map(p => p.consultas);
-    const maxV   = Math.max(...vals, 1);
-
-    // Gradiente: mais procurado → rosa vibrante; menos → tom suave de instagram
-    const colors = vals.map(v => {
-        const r = v / maxV;
-        return `rgba(${Math.round(193+39*r)}, ${Math.round(53+2*r)}, ${Math.round(132-42*r)}, 0.78)`;
+    
+    // Labels mais limpos e bem formatados
+    const labels = top10.map(p => {
+        const nome = p.nome 
+            ? p.nome.length > 38 
+                ? p.nome.substring(0, 35) + '...' 
+                : p.nome 
+            : '(sem cadastro)';
+        return `${p.codigo}  •  ${nome}`;
     });
 
+    const vals = top10.map(p => p.consultas);
+    const maxV = Math.max(...vals, 1);
+
     const ctx = document.getElementById('top10Chart').getContext('2d');
+
     if (!state.top10Chart) {
         state.top10Chart = new Chart(ctx, {
             type: 'bar',
-            data: { labels, datasets:[{
-                label:'Consultas', data:vals,
-                backgroundColor: colors,
-                borderRadius: 6, borderSkipped: false
-            }]},
-            options:{
-                responsive:true, maintainAspectRatio:false, indexAxis:'y',
-                plugins:{
-                    legend:{ display:false },
-                    tooltip:{ callbacks:{
-                        title: items => '🔍 ' + (top10[items[0].dataIndex]?.codigo || ''),
-                        label: item  => ` ${item.raw} consulta${item.raw!==1?'s':''} no período`
-                    }}
+            data: { 
+                labels, 
+                datasets: [{
+                    label: 'Consultas',
+                    data: vals,
+                    backgroundColor: vals.map(v => {
+                        const r = v / maxV;
+                        return `rgba(${Math.round(193+39*r)}, ${Math.round(53+2*r)}, ${Math.round(132-42*r)}, 0.85)`;
+                    }),
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => '🔍 ' + top10[items[0].dataIndex].codigo,
+                            label: (item) => ` ${item.raw} consulta${item.raw !== 1 ? 's' : ''}`
+                        }
+                    }
                 },
-                scales:{
-                    x:{ beginAtZero:true, grid:{ color:'rgba(255,255,255,.05)' }, ticks:{ color:'#7a94b0' }},
-                    y:{ grid:{ display:false }, ticks:{ color:'#e8edf3', font:{ size:12 }}}
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,.05)' },
+                        ticks: { color: '#7a94b0' }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: {
+                            color: '#e8edf3',
+                            font: { size: 13 },
+                            align: 'start',        // Alinha à esquerda
+                            crossAlign: 'near',    // Melhor alinhamento
+                            padding: 12            // Espaçamento à esquerda
+                        }
+                    }
+                },
+                layout: {
+                    padding: { left: 10, right: 20 }
                 }
             }
         });
     } else {
         state.top10Chart.data.labels = labels;
-        state.top10Chart.data.datasets[0].data            = vals;
-        state.top10Chart.data.datasets[0].backgroundColor = colors;
+        state.top10Chart.data.datasets[0].data = vals;
+        state.top10Chart.data.datasets[0].backgroundColor = vals.map(v => {
+            const r = v / maxV;
+            return `rgba(${Math.round(193+39*r)}, ${Math.round(53+2*r)}, ${Math.round(132-42*r)}, 0.85)`;
+        });
         state.top10Chart.update('active');
     }
 
+    // Atualiza o texto do cabeçalho
     const lbl = document.getElementById('top10-label');
     if (lbl) lbl.textContent = `Códigos mais consultados no direct — ${periodLabel(state.period)}`;
 }
