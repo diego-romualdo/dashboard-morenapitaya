@@ -561,7 +561,7 @@ async function fetchData(period) {
             const { data: prods } = await sb.from('crm_products')
                 .select('codigo, name')
                 .in('codigo', codigosOrdenados.map(([c])=>c));
-            (prods||[]).forEach(p => { prodNomeMap[p.codigo] = p.nome; });
+            (prods||[]).forEach(p => { prodNomeMap[p.codigo] = p.name; });
         } catch(_){}
     }
 
