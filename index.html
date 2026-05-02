@@ -488,7 +488,7 @@ function renderReativacaoIG(list){
     wrap.innerHTML='<div class="react-grid">'+list.map(c=>{
         const dias=Math.floor((Date.now()-new Date(c.atualizado_em).getTime())/86400000);
         const nome=c.nome||'Contato Instagram';
-        const idNum=igIdLimpo(c.remote_jid); // ★ ID limpo
+        const idNum=igIdLimpo(c.remote_jid);
         const dCls=dias>=12?'t-danger':'t-warn';
         const fCls={lead:'f-lead',qualificado:'f-qualif',cliente:'f-cliente',vip:'f-vip'}[c.estagio_funil]||'f-lead';
         const score=c.lead_score||0;
