@@ -68,8 +68,8 @@
         .legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
         .legend-dot{width:8px;height:8px;border-radius:50%}
         .chart-wrap{position:relative;height:280px;width:100%}
-        .chart-two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
-        .chart-two .chart-wrap{height:220px}
+        .chart-three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px}
+        .chart-three .chart-wrap{height:220px}
 
         /* ── Tab ── */
         .tab-content{display:none}
@@ -176,7 +176,8 @@
         [title]{cursor:help}
 
         /* ── Responsive ── */
-        @media(max-width:900px){.chart-two{grid-template-columns:1fr}}
+        @media(max-width:1100px){.chart-three{grid-template-columns:1fr 1fr}}
+        @media(max-width:700px) {.chart-three{grid-template-columns:1fr}}
         @media(max-width:768px){
             .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)))}
             .sidebar.open{transform:translateX(0)}
@@ -185,7 +186,7 @@
             .kpi-grid{grid-template-columns:1fr 1fr}
             .chart-wrap{height:200px}
             .react-grid{grid-template-columns:1fr}
-            .chart-two .chart-wrap{height:180px}
+            .chart-three .chart-wrap{height:180px}
         }
         @media(max-width:480px){
             .kpi-grid{grid-template-columns:1fr}
@@ -211,7 +212,7 @@
         <div class="nav-item"        data-tab="interacoes" onclick="showTab('interacoes')"><span class="nav-icon">💬</span> Interações</div>
         <div class="nav-item"        data-tab="produtos"   onclick="showTab('produtos')"><span class="nav-icon">👗</span> Produtos</div>
     </nav>
-    <div class="sidebar-footer">v2.0 · Auto-refresh 60s</div>
+    <div class="sidebar-footer">v2.1 · Auto-refresh 60s</div>
 </aside>
 
 <main class="main">
@@ -220,9 +221,9 @@
         <div class="header-right">
             <span class="last-update" id="lastUpdate">–</span>
             <div class="filter-group">
-                <button class="filter-btn"        onclick="setFilter('hoje',   this)">Hoje</button>
+                <button class="filter-btn active" onclick="setFilter('hoje',   this)">Hoje</button>
                 <button class="filter-btn"        onclick="setFilter('ontem',  this)">Ontem</button>
-                <button class="filter-btn active" onclick="setFilter('7d',     this)">7 Dias</button>
+                <button class="filter-btn"        onclick="setFilter('7d',     this)">7 Dias</button>
                 <button class="filter-btn"        onclick="setFilter('30d',    this)">30 Dias</button>
             </div>
         </div>
@@ -252,6 +253,7 @@
                 <div class="kpi-value" id="kpi-whatsapp"><span class="skeleton"></span></div>
             </div>
         </div>
+
         <div class="chart-card">
             <div class="chart-card-header">
                 <h3>📈 Interações por Dia</h3>
@@ -261,13 +263,27 @@
             </div>
             <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
         </div>
-        <div class="chart-two">
+
+        <!-- Três gráficos lado a lado -->
+        <div class="chart-three">
+            <!-- 1. Canal de Origem — total de contatos por canal_principal (fixo, sem período) -->
             <div class="chart-card" style="margin-bottom:0">
-                <h3 style="margin-bottom:14px">📱 Canal de Origem</h3>
+                <h3 style="margin-bottom:4px">📱 Canal de Origem</h3>
+                <p style="font-size:11px;color:var(--muted);margin-bottom:14px">Total de contatos cadastrados</p>
+                <div class="chart-wrap"><canvas id="canalOrigemChart"></canvas></div>
+            </div>
+
+            <!-- 2. Interações por Canal — filtrado pelo período selecionado -->
+            <div class="chart-card" style="margin-bottom:0">
+                <h3 style="margin-bottom:4px">💬 Interações por Canal</h3>
+                <p style="font-size:11px;color:var(--muted);margin-bottom:14px" id="canal-periodo-label">no período</p>
                 <div class="chart-wrap"><canvas id="canalChart"></canvas></div>
             </div>
+
+            <!-- 3. Estágio do Funil -->
             <div class="chart-card" style="margin-bottom:0">
-                <h3 style="margin-bottom:14px">🔖 Estágio do Funil</h3>
+                <h3 style="margin-bottom:4px">🔖 Estágio do Funil</h3>
+                <p style="font-size:11px;color:var(--muted);margin-bottom:14px">Distribuição dos contatos</p>
                 <div class="chart-wrap"><canvas id="funilChart"></canvas></div>
             </div>
         </div>
@@ -286,7 +302,6 @@
                 </div>
             </div>
 
-            <!-- Filtro interno de reativação -->
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="react-filter-bar">
                 <button class="page-btn active-pg" onclick="setReactFilter('todos',this)">Todos</button>
                 <button class="page-btn" onclick="setReactFilter('7-9',this)">7–9 dias</button>
@@ -312,7 +327,6 @@
                 <input type="text" id="searchInt" placeholder="Buscar contato..." oninput="filterInteracoes()">
             </div>
 
-            <!-- Filtro canal -->
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
                 <button class="page-btn active-pg" onclick="setIntCanal('todos',this)">Todos</button>
                 <button class="page-btn" onclick="setIntCanal('whatsapp',this)">💚 WhatsApp</button>
@@ -386,7 +400,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5v
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const state = {
-    period: '7d', chart: null, canalChart: null, funilChart: null, timer: null, loading: false,
+    // ─── Filtro padrão: Hoje ───
+    period: 'hoje',
+    chart: null, canalChart: null, canalOrigemChart: null, funilChart: null,
+    timer: null, loading: false,
     // Dados cacheados
     reativacaoAll: [], reativacaoFilter: 'todos',
     interacoesAll: [], interacoesFiltered: [], intCanal: 'todos', intPage: 1, intPerPage: 25,
@@ -460,18 +477,17 @@ async function fetchData(period) {
         .from('crm_contacts').select('id', { count:'exact', head:true });
     if (e1) throw e1;
 
-    // 2. COUNTs de interações no banco (sem trazer linhas)
-    const [rTotal, rIG, rWA] = await Promise.all([
+    // 2. COUNTs de interações no período por canal
+    // WhatsApp = total - instagram (captura qualquer variação de canal não-instagram)
+    const [rTotal, rIG] = await Promise.all([
         sb.from('crm_interactions').select('id',{count:'exact',head:true}).gte('criado_em',start).lt('criado_em',end),
         sb.from('crm_interactions').select('id',{count:'exact',head:true}).gte('criado_em',start).lt('criado_em',end).eq('canal','instagram'),
-        sb.from('crm_interactions').select('id',{count:'exact',head:true}).gte('criado_em',start).lt('criado_em',end).eq('canal','whatsapp'),
     ]);
     if (rTotal.error) throw rTotal.error;
     if (rIG.error)    throw rIG.error;
-    if (rWA.error)    throw rWA.error;
     const totalInteracoes = rTotal.count || 0;
     const instagram       = rIG.count    || 0;
-    const whatsapp        = rWA.count    || 0;
+    const whatsapp        = totalInteracoes - instagram;
 
     // 3. Dados do gráfico — só criado_em, paginado
     const chartRows = await fetchAllPaged('crm_interactions', ['criado_em'], start, end);
@@ -527,7 +543,18 @@ async function fetchData(period) {
         if (p) produtos = p;
     } catch(_){}
 
-    // 8. Distribuição por estágio do funil (para gráfico)
+    // 8a. Canal de Origem — distribuição de canal_principal dos contatos (fixo, sem período)
+    let canalOrigemDist = {};
+    try {
+        const { data: cd } = await sb.from('crm_contacts')
+            .select('canal_principal').neq('canal_principal', null);
+        (cd||[]).forEach(r => {
+            const k = r.canal_principal || 'outro';
+            canalOrigemDist[k] = (canalOrigemDist[k]||0) + 1;
+        });
+    } catch(_){}
+
+    // 8b. Distribuição por estágio do funil (para gráfico)
     let funilDist = {};
     try {
         const { data: fd } = await sb.from('crm_contacts')
@@ -546,6 +573,7 @@ async function fetchData(period) {
         interacoes: interacoesGrouped,
         nomeMap,
         produtos,
+        canalOrigemDist,
         funilDist,
         canais: { instagram, whatsapp }
     };
@@ -591,6 +619,7 @@ function getDemoData(period) {
             {codigo:'MP004',nome:'Conjunto Linho',     categoria:'Conjuntos',preco:199.90,mencoes:38},
             {codigo:'MP005',nome:'Saia Midi Estampada',categoria:'Saias',   preco:99.90, mencoes:29},
         ],
+        canalOrigemDist:{ whatsapp:3241, instagram:1538 },
         funilDist:{lead:1890, qualificado:1560, cliente:980, vip:349},
         canais:{instagram:22400,whatsapp:12983}
     };
@@ -636,24 +665,66 @@ function updateChart(d) {
 }
 
 function updateMiniCharts(d) {
-    // Canal doughnut
+    // ── 1. Canal de Origem — contatos por canal_principal (fixo, sem período) ──
+    const c0 = document.getElementById('canalOrigemChart').getContext('2d');
+    const co  = d.canalOrigemDist || {};
+    const coKeys   = Object.keys(co);
+    const coLabels = coKeys.map(k => k === 'whatsapp' ? 'WhatsApp' : k === 'instagram' ? 'Instagram' : k);
+    const coVals   = coKeys.map(k => co[k]);
+    const coColors = coKeys.map(k => k === 'instagram' ? 'rgba(193,53,132,.7)' : 'rgba(37,211,102,.7)');
+    const coBorder = coKeys.map(k => k === 'instagram' ? '#c13584' : '#25d366');
+
+    if (!state.canalOrigemChart) {
+        state.canalOrigemChart = new Chart(c0, {
+            type: 'doughnut',
+            data: { labels: coLabels, datasets:[{
+                data: coVals,
+                backgroundColor: coColors,
+                borderColor: coBorder,
+                borderWidth: 2,
+                hoverOffset: 8
+            }]},
+            options:{
+                responsive:true, maintainAspectRatio:false, cutout:'68%',
+                plugins:{ legend:{ position:'bottom', labels:{ color:'#7a94b0', boxWidth:12, padding:16 }}}
+            }
+        });
+    } else {
+        state.canalOrigemChart.data.labels = coLabels;
+        state.canalOrigemChart.data.datasets[0].data            = coVals;
+        state.canalOrigemChart.data.datasets[0].backgroundColor = coColors;
+        state.canalOrigemChart.data.datasets[0].borderColor     = coBorder;
+        state.canalOrigemChart.update('active');
+    }
+
+    // ── 2. Interações por Canal — filtrado pelo período ──
     const c1 = document.getElementById('canalChart').getContext('2d');
-    const canalData = { labels:['Instagram','WhatsApp'], datasets:[{
-        data:[d.canais.instagram, d.canais.whatsapp],
-        backgroundColor:['rgba(193,53,132,.7)','rgba(37,211,102,.7)'],
-        borderColor:['#c13584','#25d366'], borderWidth:2, hoverOffset:8
-    }]};
+    const canalData = {
+        labels:['Instagram','WhatsApp'],
+        datasets:[{
+            data:[d.canais.instagram, d.canais.whatsapp],
+            backgroundColor:['rgba(193,53,132,.7)','rgba(37,211,102,.7)'],
+            borderColor:['#c13584','#25d366'],
+            borderWidth:2, hoverOffset:8
+        }]
+    };
     if (!state.canalChart) {
         state.canalChart = new Chart(c1, {
             type:'doughnut', data:canalData,
-            options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
-                plugins:{legend:{position:'bottom',labels:{color:'#7a94b0',boxWidth:12,padding:16}}}}
+            options:{
+                responsive:true, maintainAspectRatio:false, cutout:'68%',
+                plugins:{ legend:{ position:'bottom', labels:{ color:'#7a94b0', boxWidth:12, padding:16 }}}
+            }
         });
     } else {
-        state.canalChart.data = canalData; state.canalChart.update('active');
+        state.canalChart.data = canalData;
+        state.canalChart.update('active');
     }
+    // Atualiza o subtítulo com o período atual
+    const lblPeriodo = document.getElementById('canal-periodo-label');
+    if (lblPeriodo) lblPeriodo.textContent = periodLabel(state.period);
 
-    // Funil bar
+    // ── 3. Funil — barras horizontais ──
     const c2 = document.getElementById('funilChart').getContext('2d');
     const fd = d.funilDist || {};
     const fLabels = Object.keys(fd);
@@ -662,9 +733,11 @@ function updateMiniCharts(d) {
         lead:'rgba(122,148,176,.7)', qualificado:'rgba(243,156,18,.7)',
         cliente:'rgba(46,204,113,.7)', vip:'rgba(232,55,90,.7)'
     }[k] || 'rgba(122,148,176,.5)'));
+
     if (!state.funilChart) {
         state.funilChart = new Chart(c2, {
-            type:'bar', data:{labels:fLabels, datasets:[{
+            type:'bar',
+            data:{ labels:fLabels, datasets:[{
                 label:'Contatos', data:fVals, backgroundColor:fColors, borderRadius:6, borderSkipped:false
             }]},
             options:{
@@ -678,7 +751,7 @@ function updateMiniCharts(d) {
         });
     } else {
         state.funilChart.data.labels = fLabels;
-        state.funilChart.data.datasets[0].data = fVals;
+        state.funilChart.data.datasets[0].data            = fVals;
         state.funilChart.data.datasets[0].backgroundColor = fColors;
         state.funilChart.update('active');
     }
@@ -803,7 +876,6 @@ function renderInteracoesPaginated() {
     const start  = (page - 1) * state.intPerPage;
     const slice  = state.interacoesFiltered.slice(start, start + state.intPerPage);
 
-    // Summary
     const ig  = state.interacoesFiltered.filter(i=>i.canal==='instagram').length;
     const wa  = state.interacoesFiltered.filter(i=>i.canal==='whatsapp').length;
     document.getElementById('int-summary').innerHTML =
@@ -840,7 +912,6 @@ function renderInteracoesPaginated() {
         }).join('');
     }
 
-    // Paginação
     const pag = document.getElementById('int-pagination');
     if (pages <= 1) { pag.innerHTML = ''; return; }
     const info = `${fmtNum(start+1)}–${fmtNum(Math.min(start+state.intPerPage,total))} de ${fmtNum(total)}`;
