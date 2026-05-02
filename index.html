@@ -700,7 +700,6 @@ function updateChart(d) {
 function updateTop10Chart(d) {
     const top10  = (d.procurados||[]).slice(0, 10);
     
-    // Labels mais limpos e bem formatados
     const labels = top10.map(p => {
         const nome = p.nome 
             ? p.nome.length > 38 
@@ -748,21 +747,33 @@ function updateTop10Chart(d) {
                     x: {
                         beginAtZero: true,
                         grid: { color: 'rgba(255,255,255,.05)' },
-                        ticks: { color: '#7a94b0' }
+                        ticks: { color: '#7a94b0', display: true }
                     },
                     y: {
                         grid: { display: false },
                         ticks: {
                             color: '#e8edf3',
                             font: { size: 13 },
-                            align: 'start',        // Alinha à esquerda
-                            crossAlign: 'near',    // Melhor alinhamento
-                            padding: 12            // Espaçamento à esquerda
+                            align: 'start',      // Alinhado à esquerda
+                            crossAlign: 'near',
+                            padding: 12
                         }
                     }
                 },
                 layout: {
-                    padding: { left: 10, right: 20 }
+                    padding: { left: 8, right: 30, top: 10, bottom: 10 }
+                },
+                // Exibe o número diretamente nas barras
+                plugins: {
+                    datalabels: {
+                        display: true,
+                        color: '#ffffff',
+                        font: { weight: 'bold', size: 13 },
+                        anchor: 'end',
+                        align: 'end',
+                        offset: 8,
+                        formatter: (value) => value
+                    }
                 }
             }
         });
@@ -776,11 +787,9 @@ function updateTop10Chart(d) {
         state.top10Chart.update('active');
     }
 
-    // Atualiza o texto do cabeçalho
     const lbl = document.getElementById('top10-label');
     if (lbl) lbl.textContent = `Códigos mais consultados no direct — ${periodLabel(state.period)}`;
 }
-
 // ─────────────────────────────────────────────────────────
 // Mini gráficos
 // ─────────────────────────────────────────────────────────
