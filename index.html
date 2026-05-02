@@ -602,6 +602,9 @@ async function fetchData(period) {
     } catch(_){}
 
     document.getElementById('error-container').innerHTML = '';
+     // 6. Reativação (Instagram + WhatsApp)
+    const reativacaoData = await fetchReativacao();
+
     return {
         totalContatos, totalInteracoes, instagram, whatsapp,
         chartLabels: sortedDays, chartData: sortedDays.map(d=>daily[d]),
