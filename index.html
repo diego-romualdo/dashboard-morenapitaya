@@ -605,7 +605,8 @@ async function fetchData(period) {
     return {
         totalContatos, totalInteracoes, instagram, whatsapp,
         chartLabels: sortedDays, chartData: sortedDays.map(d=>daily[d]),
-        reativacao: reativacao||[],
+        reativacaoIG: reativacaoData.ig || [],
+        reativacaoWA: reativacaoData.wa || [],
         interacoes: interacoesGrouped,
         nomeMap,
         procurados,
