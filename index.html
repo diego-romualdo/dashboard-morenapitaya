@@ -1153,10 +1153,10 @@ async function refresh(period, silent){
         updateMiniCharts(data);
 
         // Reativação
-        state.reativacaoAll=data.reativacao||[];
-        state.reativacaoFilter='todos';
-        document.querySelectorAll('#react-filter-bar .page-btn').forEach((b,i)=>b.classList.toggle('active-pg',i===0));
-        renderReativacaoFiltered();
+        state.reativacaoIG = data.reativacaoIG || [];
+        state.reativacaoWA = data.reativacaoWA || [];
+        renderReativacaoIG(state.reativacaoIG);
+        renderReativacaoWA(state.reativacaoWA);
 
         // Interações
         state.interacoesAll=data.interacoes||[];
