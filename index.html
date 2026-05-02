@@ -1132,7 +1132,8 @@ async function refresh(period, silent){
     state.loading=true;
     if(!silent){
         document.querySelectorAll('.kpi-value').forEach(el=>el.innerHTML='<span class="skeleton"></span>');
-        document.getElementById('listaReativacao').innerHTML='<div class="loading"><div class="spinner"></div>Carregando...</div>';
+        document.getElementById('listaReativacaoIG').innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
+        document.getElementById('listaReativacaoWA').innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
         document.getElementById('listaFeed').innerHTML='<tr><td colspan="6" class="loading"><div class="spinner"></div>Carregando...</td></tr>';
         document.getElementById('listaProcurados').innerHTML='<tr><td colspan="5" class="loading"><div class="spinner"></div>Carregando...</td></tr>';
         ['int-pagination','int-summary','proc-pagination','proc-summary'].forEach(id=>document.getElementById(id).innerHTML='');
