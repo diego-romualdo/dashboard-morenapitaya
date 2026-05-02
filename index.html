@@ -595,7 +595,9 @@ function renderInteracoesPaginated(){
         const qCls=i.count>=20?'b-hi':i.count>=5?'b-mid':'b-lo';
         let actionBtn='<span style="color:var(--muted);font-size:12px">—</span>';
         if(i.canal==='whatsapp'){const num=jidNum(info.jid||'');if(num)actionBtn=`<a href="https://wa.me/${num}?text=${msgEnc}" target="_blank" rel="noopener" class="btn-wa" style="padding:5px 11px;font-size:11px">💬 WhatsApp</a>`;}
-        else if(i.canal==='instagram'){actionBtn=btnIgDirect(info.jid||'','Direct IG',true);}
+        else if(i.canal==='instagram'){
+    actionBtn = btnIgDirect(info.jid || i.contact_id, 'Direct IG', true);
+}
         return`<tr>
             <td style="color:var(--muted);font-size:12px">${start+idx+1}</td>
             <td><strong>${esc(nome)}</strong></td><td>${canal}</td>
