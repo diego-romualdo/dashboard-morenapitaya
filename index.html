@@ -1184,7 +1184,13 @@ async function refresh(period, silent){
 // ─────────────────────────────────────────────────────────
 function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
 function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
-const TAB_TITLES={ geral:'Dashboard Operacional', reativacao:'Reativação · WhatsApp', interacoes:'Interações por Contato', procurados:'Mais Procurados · Instagram' };
+const TAB_TITLES={ 
+    geral:'Dashboard Operacional', 
+    reativacao_ig:'Ativação Instagram', 
+    reativacao_wa:'Ativação WhatsApp', 
+    interacoes:'Interações por Contato', 
+    procurados:'Mais Procurados · Instagram' 
+};
 function showTab(tabId){
     document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
