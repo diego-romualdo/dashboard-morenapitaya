@@ -870,45 +870,52 @@ function updateMiniCharts(d) {
 }
 
 // ─────────────────────────────────────────────────────────
-// REATIVAÇÃO
+// REATIVAÇÃO - Instagram + WhatsApp
 // ─────────────────────────────────────────────────────────
-function setReactFilter(f, btn) {
-    state.reativacaoFilter = f;
-    document.querySelectorAll('#react-filter-bar .page-btn').forEach(b=>b.classList.remove('active-pg'));
-    btn.classList.add('active-pg');
-    renderReativacaoFiltered();
+
+async function fetchReativacao() {
+    const sevenAgo    = new Date(Date.now() -  7*86400000).toISOString();
+    const fourteenAgo = new Date(Date.now() - 14*86400000).toISOString();
+
+    const { data: reativacao, error } = await sb
+        .from('crm_contacts')
+        .select('id,nome,remote_jid,canal_principal,atualizado_em,estagio_funil,lead_score,total_mensagens')
+        .lte('atualizado_em', sevenAgo)
+        .gte('atualizado_em', fourteenAgo)
+        .order('atualizado_em', { ascending: true })
+        .limit(200);
+
+    if (error) throw error;
+
+    const ig = (reativacao || []).filter(c => c.canal_principal === 'instagram');
+    const wa = (reativacao || []).filter(c => c.canal_principal === 'whatsapp' || !c.canal_principal);
+
+    return { ig, wa };
 }
-function renderReativacaoFiltered() {
-    renderReativacao(state.reativacaoAll.filter(c => {
-        const d = Math.floor((Date.now()-new Date(c.atualizado_em).getTime())/86400000);
-        if (state.reativacaoFilter==='7-9')   return d>=7&&d<=9;
-        if (state.reativacaoFilter==='10-14') return d>=10;
-        return true;
-    }));
-}
-function renderReativacao(list) {
-    const wrap = document.getElementById('listaReativacao');
+
+// Render Instagram
+function renderReativacaoIG(list) {
+    const wrap = document.getElementById('listaReativacaoIG');
     if (!list.length) {
-        wrap.innerHTML='<div class="empty-state"><div class="empty-icon">✅</div>Nenhum contato WhatsApp para reativação neste filtro</div>';
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📱</div>Nenhum contato Instagram para ativação neste momento</div>';
         return;
     }
-    const msgEnc = encodeURIComponent('Oiê!! 👋 Você sumiu, maravilhosa! Depois eu quero te mostrar as novidades... Pode ser? 🌸');
-    wrap.innerHTML = '<div class="react-grid">'+list.map(c=>{
-        const dias=Math.floor((Date.now()-new Date(c.atualizado_em).getTime())/86400000);
-        const num=jidNum(c.remote_jid), nome=c.nome||c.remote_jid||'#'+c.id;
-        const dCls=dias>=12?'t-danger':'t-warn', score=c.lead_score||0;
-        const fCls={lead:'f-lead',qualificado:'f-qualif',cliente:'f-cliente',vip:'f-vip'}[c.estagio_funil]||'f-lead';
+    wrap.innerHTML = '<div class="react-grid">' + list.map(c => {
+        const dias = Math.floor((Date.now() - new Date(c.atualizado_em).getTime()) / 86400000);
+        const nome = c.nome || 'Contato Instagram';
+        const igId = c.remote_jid || c.id;
+
         return `<div class="react-card">
             <div class="react-card-top">
                 <div class="react-avatar">${initials(nome)}</div>
                 <div style="flex:1;min-width:0">
-                    <div class="react-card-name" title="${esc(nome)}">${esc(nome)}</div>
-                    <div class="react-card-jid">${num?'+'+num:'sem número'}</div>
+                    <div class="react-card-name">${esc(nome)}</div>
+                    <div class="react-card-jid">${esc(igId)}</div>
                 </div>
             </div>
             <div class="react-card-stats">
                 <div class="react-stat">
-                    <div class="react-stat-val" style="color:${dias>=12?'var(--rosa)':'var(--warning)'}">${dias}</div>
+                    <div class="react-stat-val" style="color:var(--rosa)">${dias}</div>
                     <div class="react-stat-lbl">dias inativo</div>
                 </div>
                 <div class="react-stat">
@@ -917,29 +924,66 @@ function renderReativacao(list) {
                 </div>
             </div>
             <div class="react-card-tags">
-                <span class="tag ${dCls}">⏱ ${dias} dias</span>
-                ${c.estagio_funil?`<span class="funil-badge ${fCls}">${c.estagio_funil}</span>`:''}
-                ${score?`<span class="tag t-green">⭐ ${score}</span>`:''}
+                <span class="tag t-warn">⏱ ${dias} dias</span>
+                ${c.estagio_funil ? `<span class="funil-badge f-${c.estagio_funil || 'lead'}">${c.estagio_funil}</span>` : ''}
             </div>
-            ${score?`<div style="padding:0 2px">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Lead Score</div>
-                <div class="score-wrap"><div class="score-bar"><div class="score-fill" style="width:${Math.min(score,100)}%"></div></div><span class="score-val">${score}</span></div>
-            </div>`:''}
-            <div style="font-size:10px;color:var(--muted)">📅 ${fmtDate(c.atualizado_em)}</div>
-            <div>${num
-                ?`<a href="https://wa.me/${num}?text=${msgEnc}" target="_blank" rel="noopener" class="btn-wa">💬 Iniciar conversa</a>`
-                :'<span style="font-size:12px;color:var(--muted)">Sem número disponível</span>'}
-            </div>
+            <a href="https://www.instagram.com/direct/t/${igId}/" target="_blank" rel="noopener" class="btn-wa" style="background:#c13584; color:white;">
+                💬 Abrir Direct Instagram
+            </a>
         </div>`;
-    }).join('')+'</div>';
+    }).join('') + '</div>';
 }
-function exportReativacao() {
-    if (!state.reativacaoAll.length) return alert('Nenhum dado para exportar.');
-    let csv = 'Nome,Número,Estágio,Lead Score,Msgs Total,Última Interação\n';
-    state.reativacaoAll.forEach(c=>{
-        csv+=`"${c.nome||''}","${jidNum(c.remote_jid)}","${c.estagio_funil||''}","${c.lead_score||0}","${c.total_mensagens||0}","${fmtDate(c.atualizado_em)}"\n`;
-    });
-    downloadCSV(csv,'reativacao.csv');
+
+// Render WhatsApp
+function renderReativacaoWA(list) {
+    const wrap = document.getElementById('listaReativacaoWA');
+    if (!list.length) {
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">💚</div>Nenhum contato WhatsApp para ativação neste momento</div>';
+        return;
+    }
+    const msgEnc = encodeURIComponent('Oiê!! 👋 Você sumiu, maravilhosa! Depois eu quero te mostrar as novidades... Pode ser? 🌸');
+    
+    wrap.innerHTML = '<div class="react-grid">' + list.map(c => {
+        const dias = Math.floor((Date.now() - new Date(c.atualizado_em).getTime()) / 86400000);
+        const num = jidNum(c.remote_jid);
+        const nome = c.nome || 'Contato WhatsApp';
+
+        return `<div class="react-card">
+            <div class="react-card-top">
+                <div class="react-avatar">${initials(nome)}</div>
+                <div style="flex:1;min-width:0">
+                    <div class="react-card-name">${esc(nome)}</div>
+                    <div class="react-card-jid">${num ? '+' + num : 'sem número'}</div>
+                </div>
+            </div>
+            <div class="react-card-stats">
+                <div class="react-stat">
+                    <div class="react-stat-val" style="color:var(--rosa)">${dias}</div>
+                    <div class="react-stat-lbl">dias inativo</div>
+                </div>
+                <div class="react-stat">
+                    <div class="react-stat-val">${fmtNum(c.total_mensagens||0)}</div>
+                    <div class="react-stat-lbl">msgs total</div>
+                </div>
+            </div>
+            <div class="react-card-tags">
+                <span class="tag t-warn">⏱ ${dias} dias</span>
+                ${c.estagio_funil ? `<span class="funil-badge f-${c.estagio_funil || 'lead'}">${c.estagio_funil}</span>` : ''}
+            </div>
+            ${num 
+                ? `<a href="https://wa.me/${num}?text=${msgEnc}" target="_blank" rel="noopener" class="btn-wa">💬 Iniciar conversa</a>`
+                : '<span style="font-size:12px;color:var(--muted)">Sem número disponível</span>'
+            }
+        </div>`;
+    }).join('') + '</div>';
+}
+
+// Exportações (opcional)
+function exportReativacaoIG() {
+    alert('Exportação de Ativação Instagram em breve...');
+}
+function exportReativacaoWA() {
+    alert('Exportação de Ativação WhatsApp em breve...');
 }
 
 // ─────────────────────────────────────────────────────────
