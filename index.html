@@ -263,7 +263,24 @@ function fmtDay(s){return new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',
 function jidNum(j){return(j||'').replace(/@.*/,'').replace(/\D/g,'');}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function initials(nome){const p=(nome||'?').trim().split(' ');return p.length>=2?(p[0][0]+p[1][0]).toUpperCase():(p[0][0]||'?').toUpperCase();}
+// ── Funções auxiliares para Instagram ──
+function igIdLimpo(raw) {
+    if (!raw) return '';
+    return String(raw).split('@')[0].replace(/\D/g, '').trim();
+}
 
+function btnIgDirect(rawJid, label = 'Direct IG', small = false) {
+    const id = igIdLimpo(rawJid);
+    if (!id) return '<span style="font-size:12px;color:var(--muted)">Sem ID Instagram</span>';
+    
+    const url = `https://www.instagram.com/direct/t/${id}/`;
+    const style = small ? 'padding:5px 11px;font-size:11px;' : '';
+    
+    return `<a href="${url}" target="_blank" rel="noopener" class="btn-ig" style="${style}">
+                💬 ${label}
+            </a>`;
+}
+    
 /**
  * igIdLimpo — extrai SOMENTE os dígitos numéricos do remote_jid do Instagram.
  * Casos cobertos:
