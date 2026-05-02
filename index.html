@@ -203,7 +203,8 @@
     </div>
     <nav class="nav">
         <div class="nav-item active" data-tab="geral"      onclick="showTab('geral')">     <span class="nav-icon">📊</span> Visão Geral <span class="realtime-dot"></span></div>
-        <div class="nav-item"        data-tab="reativacao" onclick="showTab('reativacao')"><span class="nav-icon">⚠️</span> Reativação</div>
+        <div class="nav-item"        data-tab="reativacao_ig" onclick="showTab('reativacao_ig')"><span class="nav-icon">📱</span> Ativação Instagram</div>
+        <div class="nav-item"        data-tab="reativacao_wa" onclick="showTab('reativacao_wa')"><span class="nav-icon">💚</span> Ativação WhatsApp</div>
         <div class="nav-item"        data-tab="interacoes" onclick="showTab('interacoes')"><span class="nav-icon">💬</span> Interações</div>
         <div class="nav-item"        data-tab="procurados" onclick="showTab('procurados')"><span class="nav-icon">🔍</span> Mais Procurados</div>
     </nav>
@@ -414,7 +415,7 @@ const state = {
     period: 'hoje',
     chart: null, canalChart: null, canalOrigemChart: null, funilChart: null, top10Chart: null,
     timer: null, loading: false,
-    reativacaoAll: [], reativacaoFilter: 'todos',
+    reativacaoIG: [], reativacaoWA: [],
     interacoesAll: [], interacoesFiltered: [], intCanal: 'todos', intPage: 1, intPerPage: 25,
     procuradosAll: [], procuradosFiltered: [], procPage: 1, procPerPage: 30,
     nomeMap: {}
@@ -538,18 +539,8 @@ async function fetchData(period) {
         (nomes||[]).forEach(n => { nomeMap[n.id] = { nome:n.nome, jid:n.remote_jid }; });
     }
 
-    // 6. Reativação WhatsApp (7–14 dias sem contato)
-    const sevenAgo    = new Date(Date.now() -  7*86400000).toISOString();
-    const fourteenAgo = new Date(Date.now() - 14*86400000).toISOString();
-    const { data: reativacao, error: eR } = await sb
-        .from('crm_contacts')
-        .select('id,nome,remote_jid,canal_principal,atualizado_em,estagio_funil,lead_score,total_mensagens')
-        .eq('canal_principal','whatsapp')
-        .lte('atualizado_em', sevenAgo)
-        .gte('atualizado_em', fourteenAgo)
-        .order('atualizado_em', { ascending:true })
-        .limit(120);
-    if (eR) throw eR;
+        // 6. Reativação (Instagram + WhatsApp)
+    const reativacaoData = await fetchReativacao();
 
     // 7. Mais Procurados — mensagens do Instagram com texto, no período
     const igMsgs = await fetchAllPaged(
@@ -1169,10 +1160,10 @@ async function refresh(period, silent){
         updateMiniCharts(data);
 
         // Reativação
-        state.reativacaoAll=data.reativacao||[];
-        state.reativacaoFilter='todos';
-        document.querySelectorAll('#react-filter-bar .page-btn').forEach((b,i)=>b.classList.toggle('active-pg',i===0));
-        renderReativacaoFiltered();
+        state.reativacaoIG = reativacaoData.ig || [];
+        state.reativacaoWA = reativacaoData.wa || [];
+        renderReativacaoIG(state.reativacaoIG);
+        renderReativacaoWA(state.reativacaoWA);
 
         // Interações
         state.interacoesAll=data.interacoes||[];
