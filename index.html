@@ -968,14 +968,40 @@ function renderInteracoesPaginated() {
     else { tbody.innerHTML=slice.map((i,idx)=>{
         const info=state.nomeMap[i.contact_id]||{}, nome=info.nome||'Contato #'+i.contact_id;
         const canal=cb[i.canal]||`<span class="badge b-lo">${esc(i.canal||'?')}</span>`;
-        const qCls=i.count>=20?'b-hi':i.count>=5?'b-mid':'b-lo', num=jidNum(info.jid||'');
-        const waBtn=num?`<a href="https://wa.me/${num}" target="_blank" rel="noopener" class="btn-wa" style="padding:5px 11px;font-size:11px">💬</a>`:'';
+        const qCls=i.count>=20?'b-hi':i.count>=5?'b-mid':'b-lo';
+        
+        // === BOTÃO DE AÇÃO ALTERADO CONFORME SOLICITADO ===
+        let actionBtn = '';
+        if (i.canal === 'whatsapp') {
+            const num = jidNum(info.jid || '');
+            if (num) {
+                const msg = encodeURIComponent("Olá! Tudo bem? 🌸");
+                actionBtn = `<a href="https://wa.me/${num}?text=${msg}" 
+                               target="_blank" rel="noopener" 
+                               class="btn-wa" style="padding:5px 11px;font-size:11px">
+                               💬 WhatsApp
+                             </a>`;
+            }
+        } 
+        else if (i.canal === 'instagram') {
+            const igId = info.jid || i.contact_id;
+            if (igId) {
+                actionBtn = `<a href="https://www.instagram.com/direct/t/${igId}/" 
+                               target="_blank" rel="noopener" 
+                               class="btn-wa" style="padding:5px 11px;font-size:11px; background:#c13584;">
+                               💬 Direct IG
+                             </a>`;
+            }
+        }
+        const actionCell = actionBtn || '<span style="color:var(--muted);font-size:12px">—</span>';
+        // ====================================================
+
         return `<tr>
             <td style="color:var(--muted);font-size:12px">${start+idx+1}</td>
             <td><strong>${esc(nome)}</strong></td><td>${canal}</td>
             <td style="color:var(--muted);white-space:nowrap;font-size:12px">${fmtDate(i.ultima)}</td>
             <td><span class="badge ${qCls}">${fmtNum(i.count)}</span></td>
-            <td>${waBtn}</td></tr>`;
+            <td>${actionCell}</td></tr>`;
     }).join('');}
     const pag=document.getElementById('int-pagination');
     if(pages<=1){pag.innerHTML='';return;}
@@ -985,14 +1011,6 @@ function renderInteracoesPaginated() {
     btns+=`<button class="page-btn" onclick="goIntPage(${page+1})" ${page===pages?'disabled':''}>›</button>`;
     pag.innerHTML=`<span class="pagination-info">${info}</span><div class="pagination-btns">${btns}</div>`;
 }
-function goIntPage(p){ const pages=Math.ceil(state.interacoesFiltered.length/state.intPerPage); if(p<1||p>pages)return; state.intPage=p; renderInteracoesPaginated(); document.getElementById('interacoes').scrollIntoView({behavior:'smooth',block:'start'}); }
-function exportInteracoes(){
-    if(!state.interacoesFiltered.length) return alert('Nenhum dado para exportar.');
-    let csv='Nome,Canal,Última Interação,Qtd no Período\n';
-    state.interacoesFiltered.forEach(i=>{ const info=state.nomeMap[i.contact_id]||{}; csv+=`"${info.nome||'Contato #'+i.contact_id}","${i.canal}","${fmtDate(i.ultima)}","${i.count}"\n`; });
-    downloadCSV(csv,'interacoes.csv');
-}
-
 // ─────────────────────────────────────────────────────────
 // MAIS PROCURADOS
 // ─────────────────────────────────────────────────────────
