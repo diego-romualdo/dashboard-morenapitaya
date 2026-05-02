@@ -926,9 +926,12 @@ function renderReativacaoIG(list) {
                 <span class="tag t-warn">⏱ ${dias} dias</span>
                 ${c.estagio_funil ? `<span class="funil-badge f-${c.estagio_funil || 'lead'}">${c.estagio_funil}</span>` : ''}
             </div>
-            <a href="https://www.instagram.com/direct/t/${igId}/" target="_blank" rel="noopener" class="btn-wa" style="background:#c13584;">
-                💬 Abrir Direct Instagram
-            </a>
+<a href="instagram://direct/t/${igId}" 
+   onclick="if(navigator.userAgent.match(/Android|iPhone/i)){window.location.href='https://www.instagram.com/direct/t/${igId}/'; return false;}"
+   target="_blank" rel="noopener" 
+   class="btn-wa" style="background:#c13584;">
+    💬 Abrir Direct Instagram
+</a>
         </div>`;
     }).join('') + '</div>';
 }
@@ -1026,11 +1029,12 @@ function renderInteracoesPaginated() {
         else if (i.canal === 'instagram') {
             const igId = info.jid || i.contact_id;
             if (igId) {
-                actionBtn = `<a href="https://www.instagram.com/direct/t/${igId}/" 
-                               target="_blank" rel="noopener" 
-                               class="btn-wa" style="padding:5px 11px;font-size:11px; background:#c13584;">
-                               💬 Direct IG
-                             </a>`;
+actionBtn = `<a href="instagram://direct/t/${igId}" 
+               onclick="if(navigator.userAgent.match(/Android|iPhone/i)){window.location.href='https://www.instagram.com/direct/t/${igId}/';}"
+               target="_blank" rel="noopener" 
+               class="btn-wa" style="padding:5px 11px;font-size:11px; background:#c13584;">
+               💬 Direct IG
+             </a>`;
             }
         }
         const actionCell = actionBtn || '<span style="color:var(--muted);font-size:12px">—</span>';
