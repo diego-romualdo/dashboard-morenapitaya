@@ -398,8 +398,8 @@ const SUPABASE_URL      = 'https://supabase.morenapitaya.com/';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzc2MDQ5MjAwLCJleHAiOjE5MzM4MTU2MDB9.PVvpnzkL7mdGkMKO1XCR2c8awZuZJ6NyeT_3qB06EMI';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Regex: sequências de exatamente 4 dígitos isoladas (não parte de número maior)
-const CODIGO_REGEX = /\b(\d{4})\b/g;
+// Regex aprimorado: códigos de 4 dígitos mais confiáveis (evita endereços, CEPs, etc)
+const CODIGO_REGEX = /\b(?!0000|1111|2222|3333|4444|5555|6666|7777|8888|9999|\d{4}0)[1-9]\d{3}\b/g;
 
 const state = {
     period: 'hoje',
