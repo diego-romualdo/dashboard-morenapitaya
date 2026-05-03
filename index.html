@@ -364,9 +364,35 @@ async function fetchData(period){
     const igMsgs=await fetchAllPaged('crm_interactions',['mensagem'],start,end,q=>q.eq('canal','instagram').not('mensagem','is',null));
     const freqMap=extrairCodigos(igMsgs);
     const codigosOrdenados=[...freqMap.entries()].sort((a,b)=>b[1]-a[1]);
-    let prodNomeMap={};
-    if(codigosOrdenados.length){try{const{data:prods}=await sb.from('crm_products').select('codigo,name').in('codigo',codigosOrdenados.map(([c])=>c));(prods||[]).forEach(p=>{prodNomeMap[p.codigo]=p.nome;});}catch(_){}}
-    const procurados=codigosOrdenados.map(([codigo,consultas])=>({codigo,nome:prodNomeMap[codigo]||null,consultas}));
+
+    // === BUSCA DOS NOMES DAS PEÇAS (CORRIGIDO) ===
+    let prodNomeMap = {};
+    if (codigosOrdenados.length) {
+        try {
+            console.log('🔍 Buscando', codigosOrdenados.length, 'códigos na tabela crm_products');
+            
+            const { data: prods, error } = await sb.from('crm_products')
+                .select('codigo, name')                    // ← mantendo 'name'
+                .in('codigo', codigosOrdenados.map(([c])=>c));
+
+            if (error) {
+                console.error('❌ Erro Supabase produtos:', error.message);
+            } else {
+                console.log('✅ Encontrados:', prods ? prods.length : 0, 'produtos');
+                (prods || []).forEach(p => {
+                    prodNomeMap[p.codigo] = p.name || '(sem nome)';   // ← use p.name aqui
+                });
+            }
+        } catch(e) {
+            console.error('Erro ao buscar produtos:', e);
+        }
+    }
+
+    const procurados = codigosOrdenados.map(([codigo, consultas]) => ({
+        codigo,
+        nome: prodNomeMap[codigo] || null,
+        consultas
+    }));
 
     let canalOrigemDist={};
     try{const{data:cd}=await sb.from('crm_contacts').select('canal_principal').neq('canal_principal',null);(cd||[]).forEach(r=>{const k=r.canal_principal||'outro';canalOrigemDist[k]=(canalOrigemDist[k]||0)+1;});}catch(_){}
