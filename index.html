@@ -281,21 +281,35 @@ function btnIgDirect(rawJid, label = 'Direct IG', small = false) {
             </a>`;
 }
     
-function igIdLimpo(raw) {
-    if (!raw) return '';
-    return String(raw).split('@')[0].replace(/\D/g, '').trim();
+/**
+ * igIdLimpo — extrai SOMENTE os dígitos numéricos do remote_jid do Instagram.
+ * Casos cobertos:
+ *   "48291038471"              → "48291038471"  (já limpo)
+ *   "48291038471@instagram"    → "48291038471"  (com sufixo JID)
+ *   "@instagram"               → ""             (sem ID — inválido)
+ */
+function igIdLimpo(jid){
+    return(jid||'').replace(/@.*/,'').replace(/\D/g,'').trim();
 }
 
-function btnIgDirect(rawJid, label = 'Direct IG', small = false) {
-    const id = igIdLimpo(rawJid);
-    if (!id) return '<span style="font-size:12px;color:var(--muted)">Sem ID Instagram</span>';
-    
-    const url = `https://www.instagram.com/direct/t/${id}/`;
-    const style = small ? 'padding:5px 11px;font-size:11px;' : '';
-    
-    return `<a href="${url}" target="_blank" rel="noopener" class="btn-ig" style="${style}">
-                💬 ${label}
-            </a>`;
+/**
+ * btnIgDirect — gera o botão de abertura do Direct Instagram.
+ *
+ * URL usada: https://www.instagram.com/direct/t/{id_numerico}/
+ *
+ * Esta é a única URL pública que funciona com ID numérico:
+ *  - No mobile (iOS/Android): o navegador redireciona ao app e abre o Direct
+ *  - No desktop: abre o Direct na web do Instagram
+ *
+ * O deep link nativo "instagram://direct/t/{id}" NÃO é confiável —
+ * o Instagram o removeu/bloqueou progressivamente desde 2022.
+ */
+function btnIgDirect(rawJid, label, small){
+    const id=igIdLimpo(rawJid);
+    if(!id) return '<span style="font-size:12px;color:var(--muted)">Sem ID Instagram</span>';
+    const url='https://www.instagram.com/direct/t/'+id+'/';
+    const style=small?'padding:5px 11px;font-size:11px':'';
+    return`<a href="${url}" target="_blank" rel="noopener" class="btn-ig"${style?' style="'+style+'"':''}>${esc(label||'Direct IG')}</a>`;
 }
 
 // ── Paginação automática ──
@@ -351,27 +365,7 @@ async function fetchData(period){
     const freqMap=extrairCodigos(igMsgs);
     const codigosOrdenados=[...freqMap.entries()].sort((a,b)=>b[1]-a[1]);
     let prodNomeMap={};
-    let prodNomeMap = {};
-if (codigosOrdenados.length) {
-    try {
-        console.log('🔍 Buscando produtos para códigos:', codigosOrdenados.map(([c])=>c));
-        
-        const { data: prods, error } = await sb.from('crm_products')
-            .select('codigo, nome')        // mude "nome" se necessário
-            .in('codigo', codigosOrdenados.map(([c])=>c));
-
-        if (error) {
-            console.error('❌ Erro ao buscar produtos:', error);
-        } else {
-            console.log('✅ Produtos encontrados:', prods);
-            (prods||[]).forEach(p => { 
-                prodNomeMap[p.codigo] = p.nome || p.name || '(sem nome)'; 
-            });
-        }
-    } catch(e) {
-        console.error('Erro na busca de produtos:', e);
-    }
-}
+    if(codigosOrdenados.length){try{const{data:prods}=await sb.from('crm_products').select('codigo,name').in('codigo',codigosOrdenados.map(([c])=>c));(prods||[]).forEach(p=>{prodNomeMap[p.codigo]=p.nome;});}catch(_){}}
     const procurados=codigosOrdenados.map(([codigo,consultas])=>({codigo,nome:prodNomeMap[codigo]||null,consultas}));
 
     let canalOrigemDist={};
@@ -731,29 +725,6 @@ function setFilter(period,btn){
     state.timer=setInterval(()=>refresh(state.period,true),60000);
 }
 window.addEventListener('DOMContentLoaded',()=>{refresh(state.period,false);state.timer=setInterval(()=>refresh(state.period,true),60000);});
-</script>
-    <script>
-document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll('.nav-icon').forEach(el => {
-    
-    if (el.textContent.includes('📱')) {
-      el.innerHTML = `
-        <svg viewBox="0 0 24 24" width="16" height="16">
-          <path fill="#E1306C" d="M7.75 2C4.678 2 2 4.678 2 7.75v8.5C2 19.322 4.678 22 7.75 22h8.5C19.322 22 22 19.322 22 16.25v-8.5C22 4.678 19.322 2 16.25 2h-8.5zm0 1.5h8.5c2.243 0 4.25 2.007 4.25 4.25v8.5c0 2.243-2.007 4.25-4.25 4.25h-8.5C5.507 20.5 3.5 18.493 3.5 16.25v-8.5C3.5 5.507 5.507 3.5 7.75 3.5zm8.75 2a1 1 0 100 2 1 1 0 000-2zm-4.25 1.25a5 5 0 100 10 5 5 0 000-10zm0 1.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7z"/>
-        </svg>
-      `;
-    }
-
-    if (el.textContent.includes('💚') || el.textContent.includes('💬')) {
-      el.innerHTML = `
-        <svg viewBox="0 0 24 24" width="16" height="16">
-          <path fill="#25D366" d="M20.52 3.48A11.86 11.86 0 0012.03 0C5.39 0 .03 5.36.03 12c0 2.12.55 4.19 1.6 6.02L0 24l6.14-1.61A11.96 11.96 0 0012.03 24c6.64 0 12-5.36 12-12 0-3.2-1.25-6.2-3.51-8.52z"/>
-        </svg>
-      `;
-    }
-
-  });
-});
 </script>
 </body>
 </html>
