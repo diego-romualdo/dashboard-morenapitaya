@@ -147,8 +147,8 @@
         <div class="kpi-grid">
             <div class="kpi-card"><div class="kpi-label">👥 Total de Contatos</div><div class="kpi-value" id="kpi-leads"><span class="skeleton"></span></div></div>
             <div class="kpi-card"><div class="kpi-label">💬 Interações no Período</div><div class="kpi-value" id="kpi-interacoes"><span class="skeleton"></span></div></div>
-            <div class="kpi-card"><div class="kpi-label">📱 Instagram</div><div class="kpi-value" id="kpi-instagram"><span class="skeleton"></span></div></div>
-            <div class="kpi-card"><div class="kpi-label">💚 WhatsApp</div><div class="kpi-value" id="kpi-whatsapp"><span class="skeleton"></span></div></div>
+            <div class="kpi-card"><div class="kpi-label">📱 Interações Instagram</div><div class="kpi-value" id="kpi-instagram"><span class="skeleton"></span></div></div>
+            <div class="kpi-card"><div class="kpi-label">💚 Interações WhatsApp</div><div class="kpi-value" id="kpi-whatsapp"><span class="skeleton"></span></div></div>
         </div>
         <div class="chart-card">
             <div class="chart-card-header"><h3>📈 Interações por Dia</h3><div class="chart-legend"><div class="legend-item"><div class="legend-dot" style="background:#e8375a"></div>WhatsApp+IG</div></div></div>
@@ -246,7 +246,8 @@ const state={
     reativacaoIG:[],reativacaoWA:[],
     interacoesAll:[],interacoesFiltered:[],intCanal:'todos',intPage:1,intPerPage:25,
     procuradosAll:[],procuradosFiltered:[],procPage:1,procPerPage:30,
-    nomeMap:{}
+    nomeMap:{},
+    lastValidData:null,lastValidAt:null
 };
 
 // ── Helpers ──
@@ -406,38 +407,14 @@ async function fetchData(period){
         interacoes:interacoesGrouped,nomeMap,procurados,canalOrigemDist,funilDist,canais:{instagram,whatsapp}};
 }
 
-// ── Demo fallback ──
-function getDemoData(period){
-    const days=period==='30d'?30:period==='hoje'||period==='ontem'?1:7;
-    const labels=[],vals=[];
-    for(let i=days-1;i>=0;i--){labels.push(fmtDay(new Date(Date.now()-i*86400000).toISOString()));vals.push(50+Math.floor(Math.random()*400));}
-    return{
-        totalContatos:4779,totalInteracoes:35383,instagram:22400,whatsapp:12983,chartLabels:labels,chartData:vals,
-        reativacaoIG:[
-            {id:10,nome:'Camila Rodrigues',remote_jid:'48291038471',canal_principal:'instagram',atualizado_em:new Date(Date.now()-9*86400000).toISOString(),estagio_funil:'qualificado',lead_score:68,total_mensagens:11},
-            {id:11,nome:'Juliana Costa',remote_jid:'39182746501@instagram',canal_principal:'instagram',atualizado_em:new Date(Date.now()-11*86400000).toISOString(),estagio_funil:'lead',lead_score:42,total_mensagens:5},
-        ],
-        reativacaoWA:[
-            {id:1,nome:'Fernanda Lima',remote_jid:'5531999887766@s.whatsapp.net',canal_principal:'whatsapp',atualizado_em:new Date(Date.now()-9*86400000).toISOString(),estagio_funil:'qualificado',lead_score:72,total_mensagens:14},
-            {id:2,nome:'Ana Paula Souza',remote_jid:'5531988776655@s.whatsapp.net',canal_principal:'whatsapp',atualizado_em:new Date(Date.now()-12*86400000).toISOString(),estagio_funil:'cliente',lead_score:85,total_mensagens:28},
-        ],
-        interacoes:[
-            {contact_id:101,canal:'instagram',ultima:new Date(Date.now()-600000).toISOString(),count:42},
-            {contact_id:102,canal:'whatsapp',ultima:new Date(Date.now()-1200000).toISOString(),count:17},
-            {contact_id:103,canal:'whatsapp',ultima:new Date(Date.now()-3600000).toISOString(),count:9},
-            {contact_id:104,canal:'instagram',ultima:new Date(Date.now()-7200000).toISOString(),count:3},
-        ],
-        nomeMap:{101:{nome:'Demo IG A',jid:'48291038471'},102:{nome:'Demo WA B',jid:'55319990000@s.whatsapp.net'},103:{nome:'Demo WA C',jid:'55319991111@s.whatsapp.net'},104:{nome:'Demo IG D',jid:'39182746501@instagram'}},
-        procurados:[
-            {codigo:'1042',nome:'Vestido Floral Plus',consultas:87},{codigo:'2315',nome:'Calça Wide Leg',consultas:64},
-            {codigo:'3871',nome:'Blusa Cropped Franzida',consultas:51},{codigo:'4422',nome:'Conjunto Linho Bege',consultas:38},
-            {codigo:'5109',nome:'Saia Midi Estampada',consultas:29},{codigo:'6234',nome:'Vestido Ciganinha',consultas:22},
-            {codigo:'7801',nome:'Calça Pantacourt',consultas:18},{codigo:'8945',nome:'Blusa Manga Flare',consultas:14},
-            {codigo:'9033',nome:'Macacão Jeans',consultas:11},{codigo:'1187',nome:'Vestido Longo Festa',consultas:9},
-            {codigo:'2048',nome:'Saia Plissada',consultas:7},{codigo:'3302',nome:null,consultas:5},
-        ],
-        canalOrigemDist:{whatsapp:3241,instagram:1538},funilDist:{lead:1890,qualificado:1560,cliente:980,vip:349},canais:{instagram:22400,whatsapp:12983}
-    };
+// ── Aviso de erro (sem dados fictícios) ──
+function renderErrorBanner(err, temDadoAntigo){
+    const container=document.getElementById('error-container');
+    const detalhe=err&&err.message?err.message:'Falha ao conectar com o banco de dados.';
+    const aviso=temDadoAntigo
+        ? `Exibindo o último dado válido carregado às <strong>${state.lastValidAt?new Date(state.lastValidAt).toLocaleTimeString('pt-BR'):'—'}</strong>. Os números abaixo podem estar desatualizados.`
+        : 'Não há dado válido carregado ainda nesta sessão.';
+    container.innerHTML=`<div class="error-box">⚠️ <strong>Erro ao carregar dados do Supabase:</strong> ${esc(detalhe)}<br><small>${aviso}</small></div>`;
 }
 
 // ── KPIs ──
@@ -498,9 +475,9 @@ function updateMiniCharts(d){
 async function fetchReativacao(){
     const sevenAgo=new Date(Date.now()-7*86400000).toISOString(),fourteenAgo=new Date(Date.now()-14*86400000).toISOString();
     const{data,error}=await sb.from('crm_contacts')
-        .select('id,nome,remote_jid,canal_principal,atualizado_em,estagio_funil,lead_score,total_mensagens')
-        .lte('atualizado_em',sevenAgo).gte('atualizado_em',fourteenAgo)
-        .order('atualizado_em',{ascending:true}).limit(200);
+        .select('id,nome,remote_jid,canal_principal,ultima_interacao,estagio_funil,lead_score,total_mensagens')
+        .lte('ultima_interacao',sevenAgo).gte('ultima_interacao',fourteenAgo)
+        .order('ultima_interacao',{ascending:true}).limit(200);
     if(error)throw error;
     const ig=(data||[]).filter(c=>c.canal_principal==='instagram');
     const wa=(data||[]).filter(c=>c.canal_principal==='whatsapp'||!c.canal_principal);
@@ -512,7 +489,7 @@ function renderReativacaoIG(list){
     const wrap=document.getElementById('listaReativacaoIG');
     if(!list.length){wrap.innerHTML='<div class="empty-state"><div class="empty-icon">📱</div>Nenhum contato Instagram para ativação neste momento</div>';return;}
     wrap.innerHTML='<div class="react-grid">'+list.map(c=>{
-        const dias=Math.floor((Date.now()-new Date(c.atualizado_em).getTime())/86400000);
+        const dias=Math.floor((Date.now()-new Date(c.ultima_interacao).getTime())/86400000);
         const nome=c.nome||'Contato Instagram';
         const idNum=igIdLimpo(c.remote_jid);
         const dCls=dias>=12?'t-danger':'t-warn';
@@ -532,10 +509,10 @@ function renderReativacaoIG(list){
             </div>
             <div class="react-card-tags">
                 <span class="tag ${dCls}">⏱ ${dias} dias</span>
-                ${c.estagio_funil?`<span class="funil-badge ${fCls}">${c.estagio_funil}</span>`:''}
+                ${c.estagio_funil?`<span class="funil-badge ${fCls}">${esc(c.estagio_funil)}</span>`:''}
                 ${score?`<span class="tag t-green">⭐ ${score}</span>`:''}
             </div>
-            <div style="font-size:10px;color:var(--muted)">📅 ${fmtDate(c.atualizado_em)}</div>
+            <div style="font-size:10px;color:var(--muted)">📅 ${fmtDate(c.ultima_interacao)}</div>
             <div>${btnIgDirect(c.remote_jid,'Abrir Direct Instagram')}</div>
         </div>`;
     }).join('')+'</div>';
@@ -547,7 +524,7 @@ function renderReativacaoWA(list){
     if(!list.length){wrap.innerHTML='<div class="empty-state"><div class="empty-icon">💚</div>Nenhum contato WhatsApp para ativação neste momento</div>';return;}
     const msgEnc=encodeURIComponent('Oiê!! 👋 Você sumiu, maravilhosa! Depois eu quero te mostrar as novidades... Pode ser? 🌸');
     wrap.innerHTML='<div class="react-grid">'+list.map(c=>{
-        const dias=Math.floor((Date.now()-new Date(c.atualizado_em).getTime())/86400000);
+        const dias=Math.floor((Date.now()-new Date(c.ultima_interacao).getTime())/86400000);
         const num=jidNum(c.remote_jid),nome=c.nome||'Contato WhatsApp';
         const dCls=dias>=12?'t-danger':'t-warn';
         const fCls={lead:'f-lead',qualificado:'f-qualif',cliente:'f-cliente',vip:'f-vip'}[c.estagio_funil]||'f-lead';
@@ -566,11 +543,11 @@ function renderReativacaoWA(list){
             </div>
             <div class="react-card-tags">
                 <span class="tag ${dCls}">⏱ ${dias} dias</span>
-                ${c.estagio_funil?`<span class="funil-badge ${fCls}">${c.estagio_funil}</span>`:''}
+                ${c.estagio_funil?`<span class="funil-badge ${fCls}">${esc(c.estagio_funil)}</span>`:''}
                 ${score?`<span class="tag t-green">⭐ ${score}</span>`:''}
             </div>
             ${score?`<div style="padding:0 2px"><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Lead Score</div><div class="score-wrap"><div class="score-bar"><div class="score-fill" style="width:${Math.min(score,100)}%"></div></div><span class="score-val">${score}</span></div></div>`:''}
-            <div style="font-size:10px;color:var(--muted)">📅 ${fmtDate(c.atualizado_em)}</div>
+            <div style="font-size:10px;color:var(--muted)">📅 ${fmtDate(c.ultima_interacao)}</div>
             <div>${num?`<a href="https://wa.me/${num}?text=${msgEnc}" target="_blank" rel="noopener" class="btn-wa">💬 Iniciar conversa</a>`:'<span style="font-size:12px;color:var(--muted)">Sem número disponível</span>'}</div>
         </div>`;
     }).join('')+'</div>';
@@ -579,13 +556,13 @@ function renderReativacaoWA(list){
 function exportReativacaoIG(){
     if(!state.reativacaoIG.length)return alert('Nenhum dado para exportar.');
     let csv='Nome,ID Instagram,Estágio,Lead Score,Msgs Total,Última Interação\n';
-    state.reativacaoIG.forEach(c=>{csv+=`"${c.nome||''}","${igIdLimpo(c.remote_jid)}","${c.estagio_funil||''}","${c.lead_score||0}","${c.total_mensagens||0}","${fmtDate(c.atualizado_em)}"\n`;});
+    state.reativacaoIG.forEach(c=>{csv+=[csvField(c.nome),csvField(igIdLimpo(c.remote_jid)),csvField(c.estagio_funil),csvField(c.lead_score||0),csvField(c.total_mensagens||0),csvField(fmtDate(c.ultima_interacao))].join(',')+'\n';});
     downloadCSV(csv,'ativacao_instagram.csv');
 }
 function exportReativacaoWA(){
     if(!state.reativacaoWA.length)return alert('Nenhum dado para exportar.');
     let csv='Nome,Número,Estágio,Lead Score,Msgs Total,Última Interação\n';
-    state.reativacaoWA.forEach(c=>{csv+=`"${c.nome||''}","${jidNum(c.remote_jid)}","${c.estagio_funil||''}","${c.lead_score||0}","${c.total_mensagens||0}","${fmtDate(c.atualizado_em)}"\n`;});
+    state.reativacaoWA.forEach(c=>{csv+=[csvField(c.nome),csvField(jidNum(c.remote_jid)),csvField(c.estagio_funil),csvField(c.lead_score||0),csvField(c.total_mensagens||0),csvField(fmtDate(c.ultima_interacao))].join(',')+'\n';});
     downloadCSV(csv,'ativacao_whatsapp.csv');
 }
 
@@ -643,7 +620,7 @@ function goIntPage(p){const pages=Math.ceil(state.interacoesFiltered.length/stat
 function exportInteracoes(){
     if(!state.interacoesFiltered.length)return alert('Nenhum dado para exportar.');
     let csv='Nome,Canal,Última Interação,Qtd no Período\n';
-    state.interacoesFiltered.forEach(i=>{const info=state.nomeMap[i.contact_id]||{};csv+=`"${info.nome||'Contato #'+i.contact_id}","${i.canal}","${fmtDate(i.ultima)}","${i.count}"\n`;});
+    state.interacoesFiltered.forEach(i=>{const info=state.nomeMap[i.contact_id]||{};csv+=[csvField(info.nome||'Contato #'+i.contact_id),csvField(i.canal),csvField(fmtDate(i.ultima)),csvField(i.count)].join(',')+'\n';});
     downloadCSV(csv,'interacoes.csv');
 }
 
@@ -693,12 +670,20 @@ function exportProcurados(){
     const list=state.procuradosFiltered.length?state.procuradosFiltered:state.procuradosAll;
     if(!list.length)return alert('Nenhum dado para exportar.');
     let csv='Código,Peça,Consultas no Período\n';
-    list.forEach(p=>{csv+=`"${p.codigo}","${p.nome||''}","${p.consultas}"\n`;});
+    list.forEach(p=>{csv+=[csvField(p.codigo),csvField(p.nome),csvField(p.consultas)].join(',')+'\n';});
     downloadCSV(csv,'mais_procurados.csv');
 }
 
 // ── Helpers ──
 function downloadCSV(content,filename){const blob=new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href);}
+function csvField(v){
+    let s=String(v==null?'':v);
+    // neutraliza fórmulas maliciosas (Excel/Sheets) quando o campo começa com = + - @
+    if(/^[=+\-@]/.test(s)) s="'"+s;
+    // escapa aspas duplas duplicando-as (padrão CSV)
+    s=s.replace(/"/g,'""');
+    return '"'+s+'"';
+}
 
 // ── Refresh ──
 async function refresh(period,silent){
@@ -713,11 +698,26 @@ async function refresh(period,silent){
     }
     try{
         let data;
-        try{data=await fetchData(period);}
+        try{
+            data=await fetchData(period);
+            document.getElementById('error-container').innerHTML='';
+            state.lastValidData=data;state.lastValidAt=Date.now();
+        }
         catch(err){
             console.error('SUPABASE ERROR:',err.message,err.hint||'');
-            document.getElementById('error-container').innerHTML=`<div class="error-box">⚠️ <strong>${err.message}</strong>${err.hint?'<br><small>'+err.hint+'</small>':''}</div>`;
-            data=getDemoData(period);
+            if(state.lastValidData){
+                renderErrorBanner(err,true);
+                data=state.lastValidData;
+            }else{
+                renderErrorBanner(err,false);
+                document.querySelectorAll('.kpi-value').forEach(el=>el.textContent='—');
+                document.getElementById('listaReativacaoIG').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div>Sem dados — erro de conexão</div>';
+                document.getElementById('listaReativacaoWA').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div>Sem dados — erro de conexão</div>';
+                document.getElementById('listaFeed').innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">⚠️</div>Sem dados — erro de conexão</div></td></tr>';
+                document.getElementById('listaProcurados').innerHTML='<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">⚠️</div>Sem dados — erro de conexão</div></td></tr>';
+                state.loading=false;
+                return;
+            }
         }
         updateKPIs(data);updateChart(data);updateTop10Chart(data);updateMiniCharts(data);
         state.reativacaoIG=data.reativacaoIG||[];state.reativacaoWA=data.reativacaoWA||[];
@@ -730,7 +730,9 @@ async function refresh(period,silent){
         state.procuradosAll=data.procurados||[];state.procuradosFiltered=[...state.procuradosAll];state.procPage=1;
         if(document.getElementById('searchProc'))document.getElementById('searchProc').value='';
         renderProcurados();
-        document.getElementById('lastUpdate').textContent='Atualizado às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        const horaBase=state.lastValidAt?new Date(state.lastValidAt):new Date();
+        const prefixo=data===state.lastValidData&&state.lastValidAt?'Último dado válido: ':'Atualizado às ';
+        document.getElementById('lastUpdate').textContent=prefixo+horaBase.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     }finally{state.loading=false;}
 }
 
