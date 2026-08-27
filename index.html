@@ -1,165 +1,77 @@
-/*
- * STYLE REMINDER — Passagem editorial complementar: a régua lateral integra-se
- * ao papel mineral; Coral Pitaya hierarquiza decisões e rótulos de campo
- * mantêm cada bloco analítico conectado à ação operacional.
- */
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de decisões</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="dashboard-brand" href="./index.html">
+        <span class="brand-logo-frame">
+          <strong>Coral Pitaya</strong>
+        </span>
+      </a>
 
-.sidebar {
-  position: sticky;
-  isolation: isolate;
-  background: #2b2e28;
-}
+      <nav class="side-nav" aria-label="Navegação principal">
+        <a href="#visao-geral" class="active">Visão geral</a>
+        <a href="#analises">Análises</a>
+        <a href="#instancias">Instâncias</a>
+        <a href="#saude">Saúde do produto</a>
+      </nav>
 
-.sidebar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  opacity: .48;
-  background-image:
-    linear-gradient(90deg, rgba(255,253,248,.07) 1px, transparent 1px),
-    linear-gradient(rgba(255,253,248,.025) 1px, transparent 1px);
-  background-size: 42px 42px, 7px 7px;
-}
+      <p class="sidebar-footnote">
+        Painel operacional
+      </p>
+    </aside>
 
-.sidebar::after {
-  content: "";
-  position: absolute;
-  top: 104px;
-  bottom: 82px;
-  left: 21px;
-  width: 1px;
-  background: linear-gradient(to bottom, var(--coral), rgba(255,253,248,.12) 21%, rgba(255,253,248,.12) 82%, var(--coral));
-}
+    <main class="main-content">
+      <section class="queue-panel" id="visao-geral">
+        <h1>Painel de decisões</h1>
+        <p>
+          Acompanhe os principais indicadores e ações operacionais.
+        </p>
 
-.dashboard-brand,
-.side-nav,
-.sidebar-footnote { position: relative; z-index: 1; }
+        <div class="analytics-grid" id="analises">
+          <article class="card" data-field-note="prioridade">
+            <h2>Conversão</h2>
+            <p>12,8%</p>
+          </article>
 
-.dashboard-brand {
-  justify-content: center;
-  gap: 0;
-  padding-right: 12px;
-}
+          <article class="card" data-field-note="tendência">
+            <h2>Usuários ativos</h2>
+            <p>8.420</p>
+          </article>
 
-a.dashboard-brand .brand-logo-frame {
-  width: 178px;
-  height: auto;
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-  overflow: visible;
-  background: transparent;
-}
+          <article class="card" data-field-note="status">
+            <h2>Disponibilidade</h2>
+            <p>99,9%</p>
+          </article>
+        </div>
 
-.dashboard-brand .brand-logo-frame img {
-  width: 178px;
-  max-width: 100%;
-  height: auto;
-  display: block;
-  object-fit: contain;
-  transform: none;
-  filter: drop-shadow(0 1px 0 rgba(255,253,248,.12));
-}
+        <div class="instance-grid" id="instancias">
+          <article class="card">
+            <h2>Instâncias</h2>
+            <p>Todos os ambientes estão respondendo normalmente.</p>
+          </article>
+        </div>
 
-.dashboard-brand > span:last-child { min-width: 0; }
+        <div class="product-health-grid" id="saude">
+          <article class="card">
+            <h2>Saúde do produto</h2>
+            <p>Nenhum alerta crítico no momento.</p>
+          </article>
+        </div>
 
-.dashboard-brand strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-@media (max-width: 870px) {
-  a.dashboard-brand .brand-logo-frame,
-  .dashboard-brand .brand-logo-frame img { width: 178px; }
-}
-
-.side-nav {
-  gap: 0;
-  margin-left: 5px;
-  padding-left: 12px;
-  border-left: 1px solid rgba(255,253,248,.14);
-}
-
-.side-nav a {
-  margin-left: -13px;
-  padding: 12px 10px 12px 13px;
-  border-bottom: 1px solid rgba(255,253,248,.08);
-  background: transparent;
-}
-
-.side-nav a:hover,
-.side-nav a.active { background: rgba(255,253,248,.09); }
-
-.side-nav a.active { box-shadow: inset 3px 0 0 var(--coral), 3px 0 0 rgba(232,96,76,.2); }
-
-.section-tag::before {
-  content: "";
-  display: inline-block;
-  width: 12px;
-  height: 8px;
-  margin-right: 7px;
-  vertical-align: -1px;
-  background:
-    radial-gradient(circle at 1.5px 4px, var(--coral) 0 1.6px, transparent 1.9px),
-    radial-gradient(circle at 6px 1px, var(--coral) 0 1.6px, transparent 1.9px),
-    radial-gradient(circle at 10.5px 6px, var(--coral) 0 1.6px, transparent 1.9px);
-}
-
-.queue-panel {
-  position: relative;
-  border-top: 3px solid var(--coral);
-  box-shadow: 7px 8px 0 rgba(32,35,31,.055);
-}
-
-.queue-panel::before {
-  content: "superfície de decisão";
-  position: absolute;
-  top: -3px;
-  right: 24px;
-  padding: 4px 7px;
-  color: #fffaf5;
-  background: var(--coral);
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-
-[data-field-note] { position: relative; }
-
-[data-field-note]::before {
-  content: attr(data-field-note);
-  position: absolute;
-  top: 0;
-  right: 18px;
-  padding: 4px 7px;
-  color: #65756d;
-  border-left: 2px solid var(--coral);
-  background: #f0f2e9;
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-}
-
-.analytics-grid > [data-field-note],
-.instance-grid > [data-field-note],
-.product-health-grid > [data-field-note] { padding-top: 31px; }
-
-.channel-action {
-  border: 1px solid rgba(32,35,31,.15);
-  box-shadow: 2px 2px 0 rgba(32,35,31,.12);
-}
-
-.channel-action:hover { box-shadow: 3px 3px 0 rgba(32,35,31,.16); }
-
-@media (max-width: 600px) {
-  .sidebar::after { top: 90px; bottom: 68px; }
-  .queue-panel::before { right: 18px; }
-  [data-field-note]::before { right: 12px; }
-  .analytics-grid > [data-field-note],
-  .instance-grid > [data-field-note],
-  .product-health-grid > [data-field-note] { padding-top: 29px; }
-}
+        <p>
+          <button class="channel-action" type="button">
+            Abrir relatório
+          </button>
+        </p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
