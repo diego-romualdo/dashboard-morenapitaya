@@ -35,10 +35,10 @@ import type { DashboardOverview, FunnelRow, LeadQueueRow } from "@/types/crm";
 
 type TabId = "geral" | "reativacao_ig" | "reativacao_wa" | "interacoes" | "procurados";
 
-const BRAND_SYMBOL = "/manus-storage/morena-pitaya-symbol_f2c2f807.png";
-const AUTH_ART = "/manus-storage/auth-editorial-pitaya_5a970c00.jpg";
-const DECISION_ART = "/manus-storage/decision-surface-pitaya_3867e058.jpg";
-const PRODUCT_ART = "/manus-storage/product-demand-pitaya_6f73de79.jpg";
+const BRAND_SYMBOL = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/VHZiItUcBQsMjRvb.png";
+const AUTH_ART = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/IWiiPswKjDkPIuDo.jpg";
+const DECISION_ART = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/QSgUWQwjvATusOrv.jpg";
+const PRODUCT_ART = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/qQTOJSBqlxSyWyNj.jpg";
 
 const tabs: Array<{ id: TabId; label: string; icon: LucideIcon }> = [
   { id: "geral", label: "Visão geral", icon: BarChart3 },
