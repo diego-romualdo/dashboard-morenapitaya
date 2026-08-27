@@ -1,0 +1,22 @@
+# Checklist guiado — CRM Morena Pitaya
+
+- [x] Identificar o container PostgreSQL dentro do serviço `supabase` no Dokploy.
+- [x] Criar um dump lógico manual do PostgreSQL pelo terminal do container.
+- [x] Validar que o dump é legível, não está vazio e ficou salvo em `/var/lib/postgresql/data/backups/`.
+- [x] Executar e validar o script `supabase/rls_dashboard_github_auth.sql`.
+- [x] Criar o OAuth App do GitHub para o Supabase Auth.
+- [x] Localizar e revisar as variáveis de ambiente do serviço `supabase` no Dokploy.
+- [x] Confirmar que o container `auth` recebe `GOTRUE_SITE_URL` e `GOTRUE_URI_ALLOW_LIST`.
+- [x] Identificar que o Compose atual não encaminha `GITHUB_*` ao container `auth`.
+- [x] Localizar o editor e o bloco `services.auth.environment` da configuração Compose.
+- [x] Inserir as quatro variáveis `GOTRUE_EXTERNAL_GITHUB_*` no container `auth`.
+- [x] Habilitar temporariamente o primeiro login GitHub sem abrir cadastros públicos.
+- [x] Reiniciar o serviço Supabase/Auth e validar o provedor GitHub no container `auth`.
+- [ ] Cadastrar URLs de retorno do GitHub Pages e do domínio personalizado no Supabase.
+- [ ] Baixar e descompactar o pacote do dashboard no computador do usuário.
+- [ ] Substituir os arquivos do repositório local e enviar o commit pela sessão GitHub do usuário.
+- [ ] Configurar os secrets públicos de build no repositório GitHub.
+- [ ] Habilitar GitHub Pages via GitHub Actions e publicar o dashboard.
+- [ ] Fazer o primeiro login e autorizar o usuário como membro do dashboard.
+- [ ] Confirmar a leitura das views v2 sob RLS.
+- [ ] Enviar e revisar o fluxo n8n que popula `crm_products`.
