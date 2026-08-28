@@ -285,9 +285,43 @@ export default function Home() {
 
   useEffect(() => {
     if (!supabase) { setCheckingSession(false); return; }
-    void supabase.auth.getSession().then(({ data, error }) => { setSession(data.session); setAuthError(error?.message ?? null); setCheckingSession(false); });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => { setSession(nextSession); setCheckingSession(false); });
-    return () => listener.subscription.unsubscribe();
+    const client = supabase;
+    let active = true;
+
+    const clearOAuthFragment = () => {
+      const hash = new URLSearchParams(window.location.hash.slice(1));
+      if (hash.has("access_token") || hash.has("error") || hash.has("error_description")) {
+        window.history.replaceState({}, document.title, `${window.location.pathname}${window.location.search}`);
+      }
+    };
+
+    const restoreSession = async () => {
+      const hash = new URLSearchParams(window.location.hash.slice(1));
+      const accessToken = hash.get("access_token");
+      const refreshToken = hash.get("refresh_token");
+
+      const result = accessToken && refreshToken
+        ? await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+        : await client.auth.getSession();
+
+      if (!active) return;
+      setSession(result.data.session);
+      setAuthError(result.error?.message ?? null);
+      clearOAuthFragment();
+      setCheckingSession(false);
+    };
+
+    void restoreSession();
+    const { data: listener } = client.auth.onAuthStateChange((_event, nextSession) => {
+      if (!active) return;
+      setSession(nextSession);
+      setCheckingSession(false);
+    });
+
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async () => {
