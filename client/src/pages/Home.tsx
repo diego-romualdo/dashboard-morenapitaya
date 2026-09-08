@@ -32,14 +32,11 @@ import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis
 import { exportAsCsv, loadDashboardOverview } from "@/lib/dashboard";
 import { isSupabaseConfigured, supabase, supabaseConfigurationHint } from "@/lib/supabase";
 import type { DashboardOverview, FunnelRow, LeadQueueRow } from "@/types/crm";
-
 type TabId = "geral" | "reativacao_ig" | "reativacao_wa" | "interacoes" | "procurados";
-
 const BRAND_SYMBOL = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/VHZiItUcBQsMjRvb.png";
 const AUTH_ART = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/IWiiPswKjDkPIuDo.jpg";
 const DECISION_ART = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/QSgUWQwjvATusOrv.jpg";
 const PRODUCT_ART = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/qQTOJSBqlxSyWyNj.jpg";
-
 const tabs: Array<{ id: TabId; label: string; icon: LucideIcon }> = [
   { id: "geral", label: "Visão geral", icon: BarChart3 },
   { id: "reativacao_ig", label: "Ativação Instagram", icon: Instagram },
@@ -47,44 +44,36 @@ const tabs: Array<{ id: TabId; label: string; icon: LucideIcon }> = [
   { id: "interacoes", label: "Interações", icon: Inbox },
   { id: "procurados", label: "Mais procurados", icon: PackageSearch },
 ];
-
 const stageColors: Record<string, string> = {
   lead: "#7a94b0",
   qualificado: "#f39c12",
   cliente: "#2ecc71",
   vip: "#e8375a",
 };
-
 const statusLabel: Record<string, string> = {
   agir_agora: "Agir agora",
   prioritario: "Prioritário",
   acompanhar: "Acompanhar",
   nutrir: "Nutrir",
 };
-
 function formatNumber(value: number | null | undefined) {
   return new Intl.NumberFormat("pt-BR").format(Number(value ?? 0));
 }
-
 function formatCurrency(value: number | null | undefined) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(Number(value ?? 0));
 }
-
 function formatDate(value: string | null | undefined) {
   if (!value) return "Sem registro";
   return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 }
-
 function initials(name: string | null) {
   const parts = (name ?? "Contato").trim().split(/\s+/).slice(0, 2);
   return parts.map((part) => part[0]).join("").toUpperCase();
 }
-
 function daysSince(value: string | null | undefined) {
   if (!value) return null;
   return Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 86_400_000));
 }
-
 function EmptyState({ icon: Icon, title, description, compact = false }: { icon: LucideIcon; title: string; description: string; compact?: boolean }) {
   return (
     <div className={`empty-state ${compact ? "empty-state--compact" : ""}`}>
@@ -96,7 +85,6 @@ function EmptyState({ icon: Icon, title, description, compact = false }: { icon:
     </div>
   );
 }
-
 function MetricCard({ label, value, hint, tone = "pitaya", icon: Icon }: { label: string; value: string; hint: string; tone?: "pitaya" | "instagram" | "whatsapp" | "olive"; icon: LucideIcon }) {
   return (
     <article className={`metric-card metric-card--${tone}`}>
@@ -106,7 +94,6 @@ function MetricCard({ label, value, hint, tone = "pitaya", icon: Icon }: { label
     </article>
   );
 }
-
 function LeadCard({ lead, channel }: { lead: LeadQueueRow; channel: "instagram" | "whatsapp" }) {
   const score = Math.min(100, Math.max(0, Number(lead.lead_score ?? 0)));
   const inactiveDays = daysSince(lead.last_inbound_at ?? lead.last_outbound_at);
@@ -127,11 +114,22 @@ function LeadCard({ lead, channel }: { lead: LeadQueueRow; channel: "instagram" 
         <span className={`queue-badge queue-badge--${lead.fila_recomendada ?? "nutrir"}`}>{statusLabel[lead.fila_recomendada ?? "nutrir"] ?? "Em análise"}</span>
       </div>
       <div className="score-line"><span>Lead score</span><div><i style={{ width: `${score}%` }} /></div><strong>{score}</strong></div>
+      {isInstagram && lead.identificador_canal ? (
+        <div className="lead-card__actions">
+          <a
+            className="outline-button"
+            href={`https://www.instagram.com/direct/t/${lead.identificador_canal}/`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Direct
+          </a>
+        </div>
+      ) : null}
       <p className="lead-card__hint">Última atividade: {formatDate(lead.last_inbound_at ?? lead.last_outbound_at)}</p>
     </article>
   );
 }
-
 function LoginScreen({ onSignIn, busy, error }: { onSignIn: () => void; busy: boolean; error: string | null }) {
   return (
     <div className="auth-shell">
@@ -154,7 +152,6 @@ function LoginScreen({ onSignIn, busy, error }: { onSignIn: () => void; busy: bo
     </div>
   );
 }
-
 function DashboardApp({ session }: { session: Session }) {
   const [tab, setTab] = useState<TabId>("geral");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -162,7 +159,6 @@ function DashboardApp({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
-
   const refresh = useCallback(async () => {
     if (!supabase) return;
     setLoading(true);
@@ -177,13 +173,11 @@ function DashboardApp({ session }: { session: Session }) {
       setLoading(false);
     }
   }, []);
-
   useEffect(() => {
     void refresh();
     const timer = window.setInterval(() => void refresh(), 60_000);
     return () => window.clearInterval(timer);
   }, [refresh]);
-
   const metrics = useMemo(() => {
     const instances = overview?.instances ?? [];
     const leads = overview?.leads ?? [];
@@ -198,28 +192,22 @@ function DashboardApp({ session }: { session: Session }) {
       validValue: leads.reduce((sum, lead) => sum + Number(lead.valid_orders_value_total ?? 0), 0),
     };
   }, [overview]);
-
   const visibleLeads = useMemo(() => {
     const source = overview?.leads ?? [];
     if (tab === "reativacao_ig") return source.filter((lead) => lead.canal === "instagram");
     if (tab === "reativacao_wa") return source.filter((lead) => lead.canal === "whatsapp");
     return source;
   }, [overview, tab]);
-
   const funnel = overview?.funnel ?? [];
   const channelData = useMemo(() => [
     { name: "Instagram", value: metrics.instagram, color: "#c13584" },
     { name: "WhatsApp", value: metrics.whatsapp, color: "#25d366" },
   ].filter((item) => item.value > 0), [metrics]);
-
   const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.user_name || session.user.email?.split("@")[0] || "Operação";
-
   const exportLeads = () => {
     exportAsCsv("fila-de-leads-morena-pitaya.csv", ["Contato", "Canal", "Estágio", "Score", "Fila", "Pedidos válidos", "Valor não cancelado", "Última atividade"], visibleLeads.map((lead) => [lead.nome, lead.canal, lead.estagio_funil, lead.lead_score, lead.fila_recomendada, lead.valid_orders_count, lead.valid_orders_value_total, lead.last_inbound_at ?? lead.last_outbound_at]));
   };
-
   const signOut = async () => { await supabase?.auth.signOut(); };
-
   const renderGeneral = () => (
     <>
       <section className="metrics-grid">
@@ -243,17 +231,13 @@ function DashboardApp({ session }: { session: Session }) {
       </section>
     </>
   );
-
   const renderActivation = (channel: "instagram" | "whatsapp") => {
     const Icon = channel === "instagram" ? Instagram : MessageCircle;
     const channelName = channel === "instagram" ? "Instagram" : "WhatsApp";
     return <section className="panel tab-panel"><div className="panel__heading"><div><p className="eyebrow">Fila de reativação</p><h2>Ativação {channelName}</h2><p className="subcopy">Leads da view v2 por canal, ordenados por score e sinal de ação.</p></div><button className="outline-button" type="button" onClick={exportLeads}><Download size={15} /> Exportar CSV</button></div>{visibleLeads.length ? <div className="lead-grid">{visibleLeads.map((lead) => <LeadCard key={lead.contact_id} lead={lead} channel={channel} />)}</div> : <EmptyState icon={Icon} title={`Nenhum contato ${channelName} na fila`} description="A lista será preenchida pelos fluxos de ingestão e pelas regras da fila v2." />}</section>;
   };
-
   const renderInteractions = () => <section className="panel tab-panel"><div className="panel__heading"><div><p className="eyebrow">Operação dos canais</p><h2>Interações por instância</h2><p className="subcopy">Janela móvel de 30 dias, consultada diretamente da view de instâncias.</p></div><span className="live-chip"><i /> 30 dias</span></div>{overview?.instances.length ? <div className="data-table-wrap"><table className="data-table"><thead><tr><th>Instância</th><th>Canal</th><th>Recebidas</th><th>Enviadas</th><th>Ativos</th><th>Pendentes</th></tr></thead><tbody>{overview.instances.map((instance) => <tr key={instance.instance_id}><td><strong>{instance.instance_nome}</strong><small>{instance.instance_slug}</small></td><td><span className={`channel-badge channel-badge--${instance.canal === "instagram" ? "ig" : instance.canal === "whatsapp" ? "wa" : "neutral"}`}>{instance.canal}</span></td><td>{formatNumber(instance.recebidas_30d)}</td><td>{formatNumber(instance.enviadas_30d)}</td><td>{formatNumber(instance.contatos_ativos_30d)}</td><td><span className={instance.entradas_pendentes ? "pending-count" : "muted-count"}>{formatNumber(instance.entradas_pendentes)}</span></td></tr>)}</tbody></table></div> : <EmptyState icon={Inbox} title="Sem interações registradas" description="Assim que o n8n inserir eventos, o painel passará a indicar o ritmo de cada canal." />}</section>;
-
   const renderProducts = () => <section className="panel tab-panel product-panel"><img src={PRODUCT_ART} className="product-panel__art" alt="" aria-hidden="true" /><div className="panel__heading"><div><p className="eyebrow">Demanda de produto</p><h2>Mais procurados</h2><p className="subcopy">Este módulo será ativado assim que o fluxo n8n sincronizar o catálogo em <code>crm_products</code> e registrar mensagens de produto.</p></div><span className="coming-chip">Próxima integração</span></div><div className="product-panel__body"><EmptyState icon={PackageSearch} title="Catálogo aguardando sincronização" description="No momento, crm_products não possui registros. O fluxo n8n de produtos será revisado antes da ativação deste ranking." /><button className="outline-button" type="button" onClick={() => setTab("interacoes")}><ArrowDownToLine size={15} /> Ver saúde dos canais</button></div></section>;
-
   const title = tabs.find((item) => item.id === tab)?.label ?? "Dashboard operacional";
   return (
     <div className="dashboard-shell">
@@ -276,54 +260,45 @@ function DashboardApp({ session }: { session: Session }) {
     </div>
   );
 }
-
 export default function Home() {
   const [session, setSession] = useState<Session | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-
   useEffect(() => {
     if (!supabase) { setCheckingSession(false); return; }
     const client = supabase;
     let active = true;
-
     const clearOAuthFragment = () => {
       const hash = new URLSearchParams(window.location.hash.slice(1));
       if (hash.has("access_token") || hash.has("error") || hash.has("error_description")) {
         window.history.replaceState({}, document.title, `${window.location.pathname}${window.location.search}`);
       }
     };
-
     const restoreSession = async () => {
       const hash = new URLSearchParams(window.location.hash.slice(1));
       const accessToken = hash.get("access_token");
       const refreshToken = hash.get("refresh_token");
-
       const result = accessToken && refreshToken
         ? await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
         : await client.auth.getSession();
-
       if (!active) return;
       setSession(result.data.session);
       setAuthError(result.error?.message ?? null);
       clearOAuthFragment();
       setCheckingSession(false);
     };
-
     void restoreSession();
     const { data: listener } = client.auth.onAuthStateChange((_event, nextSession) => {
       if (!active) return;
       setSession(nextSession);
       setCheckingSession(false);
     });
-
     return () => {
       active = false;
       listener.subscription.unsubscribe();
     };
   }, []);
-
   const signIn = async () => {
     if (!supabase) return;
     setAuthBusy(true); setAuthError(null);
@@ -331,7 +306,6 @@ export default function Home() {
     const { error } = await supabase.auth.signInWithOAuth({ provider: "github", options: { redirectTo } });
     if (error) { setAuthError(error.message); setAuthBusy(false); }
   };
-
   if (checkingSession && isSupabaseConfigured) return <div className="boot-screen"><img src={BRAND_SYMBOL} alt="" /><span>Preparando sua superfície de decisão…</span></div>;
   if (!session) return <LoginScreen onSignIn={() => void signIn()} busy={authBusy} error={authError} />;
   return <DashboardApp session={session} />;
