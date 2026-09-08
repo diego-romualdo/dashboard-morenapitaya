@@ -114,16 +114,30 @@ function LeadCard({ lead, channel }: { lead: LeadQueueRow; channel: "instagram" 
         <span className={`queue-badge queue-badge--${lead.fila_recomendada ?? "nutrir"}`}>{statusLabel[lead.fila_recomendada ?? "nutrir"] ?? "Em análise"}</span>
       </div>
       <div className="score-line"><span>Lead score</span><div><i style={{ width: `${score}%` }} /></div><strong>{score}</strong></div>
-      {isInstagram && lead.identificador_canal ? (
+           {isInstagram ? (
         <div className="lead-card__actions">
-          <a
-            className="outline-button"
-            href={`https://www.instagram.com/direct/t/${lead.identificador_canal}/`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Direct
-          </a>
+          {lead.handle ? (
+            <>
+              <a
+                className="outline-button"
+                href={`https://www.instagram.com/${lead.handle}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                @{lead.handle}
+              </a>
+              <a
+                className="outline-button"
+                href={`https://ig.me/m/${lead.handle}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Mensagem
+              </a>
+            </>
+          ) : (
+            <span className="muted-count">sem handle</span>
+          )}
         </div>
       ) : null}
       <p className="lead-card__hint">Última atividade: {formatDate(lead.last_inbound_at ?? lead.last_outbound_at)}</p>
