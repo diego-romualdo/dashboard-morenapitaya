@@ -42,6 +42,7 @@ export type LeadQueueRow = {
   tarefas_abertas: number | null;
   tarefas_vencidas: number | null;
   fila_recomendada: string | null;
+  handle: string | null;
 };
 
 export type FunnelRow = {
