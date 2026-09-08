@@ -114,7 +114,7 @@ function LeadCard({ lead, channel }: { lead: LeadQueueRow; channel: "instagram" 
         <span className={`queue-badge queue-badge--${lead.fila_recomendada ?? "nutrir"}`}>{statusLabel[lead.fila_recomendada ?? "nutrir"] ?? "Em análise"}</span>
       </div>
       <div className="score-line"><span>Lead score</span><div><i style={{ width: `${score}%` }} /></div><strong>{score}</strong></div>
-           {isInstagram ? (
+      {isInstagram ? (
         <div className="lead-card__actions">
           {lead.handle ? (
             <>
