@@ -74,6 +74,22 @@ function daysSince(value: string | null | undefined) {
   if (!value) return null;
   return Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 86_400_000));
 }
+function whatsappUrl(identifier: string | null | undefined) {
+  const digits = (identifier ?? "").replace(/\D/g, "");
+  if (digits.length < 10) return null;
+
+  const phone =
+    digits.startsWith("55")
+      ? digits
+      : digits.length === 10 || digits.length === 11
+        ? `55${digits}`
+        : digits;
+
+  const message =
+    "Oi amiga! Você sumiu... Estamos com novidades aqui na loja Morena Pitaya! Posso te mostrar?";
+
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message )}`;
+}
 function EmptyState({ icon: Icon, title, description, compact = false }: { icon: LucideIcon; title: string; description: string; compact?: boolean }) {
   return (
     <div className={`empty-state ${compact ? "empty-state--compact" : ""}`}>
@@ -98,6 +114,10 @@ function LeadCard({ lead, channel }: { lead: LeadQueueRow; channel: "instagram" 
   const score = Math.min(100, Math.max(0, Number(lead.lead_score ?? 0)));
   const inactiveDays = daysSince(lead.last_inbound_at ?? lead.last_outbound_at);
   const isInstagram = channel === "instagram";
+  const whatsappLink = !isInstagram
+  ? whatsappUrl(lead.identificador_canal)
+  : null;
+
   return (
     <article className="lead-card">
       <div className="lead-card__head">
@@ -141,6 +161,19 @@ function LeadCard({ lead, channel }: { lead: LeadQueueRow; channel: "instagram" 
         </div>
       ) : null}
       <p className="lead-card__hint">Última atividade: {formatDate(lead.last_inbound_at ?? lead.last_outbound_at)}</p>
+{whatsappLink && (
+  <a
+    className="whatsapp-action"
+    href={whatsappLink}
+    target="_blank"
+    rel="noreferrer"
+  >
+    <MessageCircle size={15} />
+    Abrir no WhatsApp
+    <ExternalLink size={13} />
+  </a>
+)}
+
     </article>
   );
 }
