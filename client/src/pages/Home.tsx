@@ -33,7 +33,7 @@ import { exportAsCsv, loadDashboardOverview } from "@/lib/dashboard";
 import { isSupabaseConfigured, supabase, supabaseConfigurationHint } from "@/lib/supabase";
 import type { DashboardOverview, FunnelRow, LeadQueueRow } from "@/types/crm";
 type TabId = "geral" | "reativacao_ig" | "reativacao_wa" | "interacoes" | "procurados";
-const BRAND_SYMBOL = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/VHZiItUcBQsMjRvb.png";
+const BRAND_SYMBOL = "/LogoMorenaPitaya02.png";
 const AUTH_ART = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/IWiiPswKjDkPIuDo.jpg";
 const DECISION_ART = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/QSgUWQwjvATusOrv.jpg";
 const PRODUCT_ART = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/qQTOJSBqlxSyWyNj.jpg";
@@ -297,7 +297,28 @@ function DashboardApp({ session }: { session: Session }) {
       </aside>
       <main className="dashboard-main">
         <header className="dashboard-header"><div><p className="eyebrow">Operação Morena Pitaya</p><h1>{title}</h1></div><div className="header-actions"><span className="last-update">{updatedAt ? `Atualizado às ${updatedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}` : "Conectando às views…"}</span><button className="refresh-button" onClick={() => void refresh()} type="button" disabled={loading}>{loading ? <RefreshCw className="spin" size={16} /> : <RefreshCw size={16} />}<span>Atualizar</span></button><div className="user-menu"><span>{String(userName).slice(0, 2).toUpperCase()}</span><button title="Sair" type="button" onClick={() => void signOut()}><LogOut size={16} /></button></div></div></header>
-        {loadError && <div className="data-error"><CircleAlert size={18} /><div><strong>Não foi possível consultar as views do CRM.</strong><p>{loadError}. Verifique as políticas RLS para usuários autenticados e tente novamente.</p></div><button type="button" onClick={() => void refresh()}>Tentar novamente</button></div>}
+        <section className="period-banner" aria-label="Filtro global de período">
+  <div>
+    <p className="eyebrow">Janela operacional</p>
+    <strong>Mostrar sinais dos últimos {periodDays} dias</strong>
+    <span>O filtro afeta métricas, funil e filas desta tela.</span>
+  </div>
+
+  <div className="period-switch" role="group" aria-label="Selecionar período">
+    {([7, 14, 30] as const).map((days) => (
+      <button
+        key={days}
+        type="button"
+        className={periodDays === days ? "active" : ""}
+        aria-pressed={periodDays === days}
+        onClick={() => setPeriodDays(days)}
+      >
+        {days} dias
+      </button>
+    ))}
+  </div>
+</section>
+{loadError && <div className="data-error"><CircleAlert size={18} /><div><strong>Não foi possível consultar as views do CRM.</strong><p>{loadError}. Verifique as políticas RLS para usuários autenticados e tente novamente.</p></div><button type="button" onClick={() => void refresh()}>Tentar novamente</button></div>}
         {tab === "geral" && renderGeneral()}
         {tab === "reativacao_ig" && renderActivation("instagram")}
         {tab === "reativacao_wa" && renderActivation("whatsapp")}

@@ -226,3 +226,23 @@ button:focus-visible, a:focus-visible { outline:2px solid var(--mp-pitaya-soft);
     flex: 1;
   }
 }
+.brand-lockup > div,
+.sidebar-brand > div {
+  display: none;
+}
+
+.brand-lockup img {
+  width: min(100%, 220px);
+  height: auto;
+  object-fit: contain;
+}
+
+.sidebar-brand img {
+  width: 178px;
+  height: auto;
+  object-fit: contain;
+}
+
+.sidebar-brand {
+  justify-content: center;
+}
