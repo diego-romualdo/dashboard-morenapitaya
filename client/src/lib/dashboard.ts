@@ -7,15 +7,11 @@ import type { DashboardInstance, DashboardOverview, FunnelRow, LeadQueueRow, Per
 
 const asNumber = (value: unknown) => Number(value ?? 0);
 
-export async function loadDashboardOverview(client: SupabaseClient, _days: PeriodDays = 30): Promise<DashboardOverview> {
+export async function loadDashboardOverview(client: SupabaseClient, days: PeriodDays = 30): Promise<DashboardOverview> {
   const [instancesResult, leadsResult, funnelResult] = await Promise.all([
-    client.from("vw_dashboard_instances").select("*").order("instance_nome"),
-    client
-      .from("vw_dashboard_lead_queue")
-      .select("*")
-      .order("lead_score", { ascending: false, nullsFirst: false })
-      .limit(250),
-    client.from("vw_dashboard_funil").select("*").order("contatos", { ascending: false }),
+    client.rpc("crm_dashboard_instances_period", { p_days: days }),
+    client.rpc("crm_dashboard_leads_period", { p_days: days, p_canal: null }),
+    client.rpc("crm_dashboard_funnel_period", { p_days: days }),
   ]);
 
   const error = instancesResult.error ?? leadsResult.error ?? funnelResult.error;
