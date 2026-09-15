@@ -61,3 +61,4 @@ export type DashboardOverview = {
   funnel: FunnelRow[];
 };
 
+export type PeriodDays = 7 | 14 | 30;

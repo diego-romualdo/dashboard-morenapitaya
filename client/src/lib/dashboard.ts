@@ -3,11 +3,11 @@
  * Visual direction: real operational signals only; queries consume the curated views rather than reassembling the CRM in the browser.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { DashboardOverview, DashboardInstance, FunnelRow, LeadQueueRow } from "@/types/crm";
+import type { DashboardInstance, DashboardOverview, FunnelRow, LeadQueueRow, PeriodDays } from "@/types/crm";
 
 const asNumber = (value: unknown) => Number(value ?? 0);
 
-export async function loadDashboardOverview(client: SupabaseClient): Promise<DashboardOverview> {
+export async function loadDashboardOverview(client: SupabaseClient, _days: PeriodDays = 30): Promise<DashboardOverview> {
   const [instancesResult, leadsResult, funnelResult] = await Promise.all([
     client.from("vw_dashboard_instances").select("*").order("instance_nome"),
     client

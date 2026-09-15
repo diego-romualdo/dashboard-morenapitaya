@@ -31,7 +31,7 @@ import type { LucideIcon } from "lucide-react";
 import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { exportAsCsv, loadDashboardOverview } from "@/lib/dashboard";
 import { isSupabaseConfigured, supabase, supabaseConfigurationHint } from "@/lib/supabase";
-import type { DashboardOverview, FunnelRow, LeadQueueRow } from "@/types/crm";
+import type { DashboardOverview, FunnelRow, LeadQueueRow, PeriodDays } from "@/types/crm";
 type TabId = "geral" | "reativacao_ig" | "reativacao_wa" | "interacoes" | "procurados";
 const BRAND_SYMBOL = "/LogoMorenaPitaya02.png";
 const AUTH_ART = "https://files.manuscdn.com/user_upload_by_module/session_file/310419663028630151/IWiiPswKjDkPIuDo.jpg";
@@ -206,11 +206,12 @@ function DashboardApp({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+  const [periodDays, setPeriodDays] = useState<PeriodDays>(30);
   const refresh = useCallback(async () => {
     if (!supabase) return;
     setLoading(true);
     try {
-      const data = await loadDashboardOverview(supabase);
+      const data = await loadDashboardOverview(supabase, periodDays);
       setOverview(data);
       setLoadError(null);
       setUpdatedAt(new Date());
@@ -219,7 +220,7 @@ function DashboardApp({ session }: { session: Session }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+    }, [periodDays]);
   useEffect(() => {
     void refresh();
     const timer = window.setInterval(() => void refresh(), 60_000);
